@@ -1,0 +1,734 @@
+{
+	"info": {
+		"_postman_id": "edc2eade-503d-4688-8fbf-4e357f631337",
+		"name": "Local Service Registry",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22659041"
+	},
+	"item": [
+		{
+			"name": "Register One Service",
+			"item": [
+				{
+					"name": "Fetch All Services",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is empty\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.eql({});\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register New Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ensure New Service Exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"        \"test-application-v1\": [\r",
+									"            {\r",
+									"                \"applicationName\": \"test-application-v1\",\r",
+									"                \"applicationVersion\": 1,\r",
+									"                \"url\": \"http://10.10.10.10\",\r",
+									"                \"port\": 8080,\r",
+									"                \"dependsOn\": [],\r",
+									"                \"metaData\": {}\r",
+									"            }\r",
+									"        ]\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Wait and Ensure Health Check Fails and Removes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"waiting\", true);\r",
+									"\r",
+									"setTimeout(function() {\r",
+									"    pm.variables.set(\"waiting\", false);\r",
+									"    console.log(\"Waited for 30 seconds before proceeding with the request.\");\r",
+									"}, 31000);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Register Two Services",
+			"item": [
+				{
+					"name": "Register First New Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 100ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Second New Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 100ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.11\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ensure New Services Exists",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"        \"test-application-v1\": [\r",
+									"            {\r",
+									"                \"applicationName\": \"test-application-v1\",\r",
+									"                \"applicationVersion\": 1,\r",
+									"                \"url\": \"http://10.10.10.10\",\r",
+									"                \"port\": 8080,\r",
+									"                \"dependsOn\": [],\r",
+									"                \"metaData\": {}\r",
+									"            },\r",
+									"            {\r",
+									"                \"applicationName\": \"test-application-v1\",\r",
+									"                \"applicationVersion\": 1,\r",
+									"                \"url\": \"http://10.10.10.11\",\r",
+									"                \"port\": 8080,\r",
+									"                \"dependsOn\": [],\r",
+									"                \"metaData\": {}\r",
+									"            }\r",
+									"        ]\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Wait and Ensure Health Check Fails and Removes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"waiting\", true);\r",
+									"\r",
+									"setTimeout(function() {\r",
+									"    pm.variables.set(\"waiting\", false);\r",
+									"    console.log(\"Waited for 30 seconds before proceeding with the request.\");\r",
+									"}, 31000);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Register And Deregister",
+			"item": [
+				{
+					"name": "Register New Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 100ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deregister Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"version\": 1,\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Wait and Ensure Health Check Fails and Removes Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"waiting\", true);\r",
+									"\r",
+									"setTimeout(function() {\r",
+									"    pm.variables.set(\"waiting\", false);\r",
+									"    console.log(\"Waited for 30 seconds before proceeding with the request.\");\r",
+									"}, 31000);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Heartbeat",
+			"item": [
+				{
+					"name": "Heatbeat Reregister",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"        \"event\": \"RE_REGISTER\",\r",
+									"        \"description\": \"Heartbeat not found, registry required\"\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/heartbeat",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"heartbeat"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register New Service",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is less than 100ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/service-registry",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"service-registry"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Heartbeat Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 200ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Response matches expected data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    var expectedData = {\r",
+									"        \"event\": \"FOUND\",\r",
+									"        \"description\": \"Heartbeat Found\"\r",
+									"    };\r",
+									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/heartbeat",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"heartbeat"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

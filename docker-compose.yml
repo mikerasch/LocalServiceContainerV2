@@ -1,0 +1,31 @@
+services:
+  service-registry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9095:9095"
+    networks:
+      - app-network
+    healthcheck:
+      test: "curl --fail --silent http://service-registry:9095/service-registry/api/v1/actuator/health | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  newman:
+    image: postman/newman:alpine
+    volumes:
+      - ./postman/environment/env.json:/etc/newman/environment.json
+      - ./postman/collection/collection.json:/etc/newman/collection.json
+    networks:
+      - app-network
+    depends_on:
+      service-registry:
+        condition: service_healthy
+    command: run /etc/newman/collection.json --environment /etc/newman/environment.json --env-var server=service-registry:9095/service-registry/api/v1
+
+networks:
+  app-network:
+    driver: bridge
