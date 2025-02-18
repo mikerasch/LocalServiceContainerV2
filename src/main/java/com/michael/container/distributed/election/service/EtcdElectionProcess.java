@@ -15,12 +15,11 @@ import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
+import io.etcd.jetcd.watch.WatchResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import io.etcd.jetcd.watch.WatchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -87,6 +86,8 @@ public class EtcdElectionProcess implements ElectionProcess {
         acquiredLeadership = true;
         logger.info("Server elected as leader...");
         startLeaseRenewal();
+      } else {
+        logger.info("Server elected as follower...");
       }
     } catch (ExecutionException | InterruptedException e) {
       logger.warn("Could not acquire leadership", e);
@@ -101,8 +102,7 @@ public class EtcdElectionProcess implements ElectionProcess {
     electionState.setWatchCloseable(
         etcdClient
             .getWatchClient()
-            .watch(
-                key, WatchOption.builder().withNoPut(true).build(), this::onDeletionOfKey));
+            .watch(key, WatchOption.builder().withNoPut(true).build(), this::onDeletionOfKey));
   }
 
   private void onDeletionOfKey(WatchResponse watchResponse) {
@@ -114,8 +114,7 @@ public class EtcdElectionProcess implements ElectionProcess {
       } catch (IOException e) {
         logger.error("Error resetting the election state after leader deletion.", e);
       } finally {
-        CompletableFuture.runAsync(
-            () -> eventPublisher.publishEvent(new LeaderKeyDeletionEvent()));
+        CompletableFuture.runAsync(() -> eventPublisher.publishEvent(new LeaderKeyDeletionEvent()));
       }
     }
   }

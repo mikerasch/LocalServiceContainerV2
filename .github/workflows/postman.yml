@@ -28,7 +28,7 @@ jobs:
       - name: Run Docker Compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: "./docker-compose.yml"
+          compose-file: "./postman-docker-compose.yml"
           action: "up"
 
       - name: Run Application With Postman Tests
@@ -38,5 +38,5 @@ jobs:
       - name: Clean up containers
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: "./docker-compose.yml"
+          compose-file: "./postman-docker-compose.yml"
           action: "down"
