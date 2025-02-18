@@ -1,5 +1,6 @@
 package com.michael.container.distributed.election.config;
 
+import com.michael.container.distributed.election.exception.UncheckedURISyntaxException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class EtcdConfiguration {
                   try {
                     return new URI(url);
                   } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+                    throw new UncheckedURISyntaxException(e);
                   }
                 })
             .toList()
