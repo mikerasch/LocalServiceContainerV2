@@ -50,7 +50,7 @@ public class EtcdElectionProcess implements ElectionProcess {
       etcdClient.getLeaseClient().revoke(electionState.getLeaseId()).get();
       electionState.reset();
     } catch (ExecutionException | InterruptedException | IOException e) {
-      logger.warn("Release leadership exception {}", e.getMessage());
+      logger.warn("Release leadership exception.", e);
     }
   }
 
@@ -89,7 +89,7 @@ public class EtcdElectionProcess implements ElectionProcess {
         startLeaseRenewal();
       }
     } catch (ExecutionException | InterruptedException e) {
-      logger.warn("Could not acquire leadership {}", e.getMessage());
+      logger.warn("Could not acquire leadership", e);
     }
     electionState.setRole(acquiredLeadership ? Role.LEADER : Role.FOLLOWER);
     listenForKeyDeletion();
@@ -111,8 +111,8 @@ public class EtcdElectionProcess implements ElectionProcess {
       logger.info("Leader deletion occurred.");
       try {
         electionState.reset();
-      } catch (IOException ignored) {
-
+      } catch (IOException e) {
+        logger.error("Error resetting the election state after leader deletion.", e);
       } finally {
         CompletableFuture.runAsync(
             () -> eventPublisher.publishEvent(new LeaderKeyDeletionEvent()));
