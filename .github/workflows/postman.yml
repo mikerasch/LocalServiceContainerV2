@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Application With Postman Tests
         run: |
-          docker compose -f docker-compose.yml up --build --exit-code-from newman
+          docker compose -f postman-docker-compose.yml up --build --exit-code-from newman
 
       - name: Clean up containers
         uses: hoverkraft-tech/compose-action@v2.0.1
