@@ -24,7 +24,7 @@ services:
       timeout: 5s
   service-registry:
     environment:
-      - ETCD_URLS
+      - ETCD_URLS=http://etcd:2379
     build:
       context: .
       dockerfile: Dockerfile
