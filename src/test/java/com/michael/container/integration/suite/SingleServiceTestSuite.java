@@ -5,7 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.michael.container.health.routine.HealthCheckRoutine;
+import com.michael.container.health.service.HealthCheckService;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
@@ -41,7 +41,7 @@ class SingleServiceTestSuite {
 
   @Autowired ServiceRegistryService serviceRegistryService;
 
-  @Autowired HealthCheckRoutine healthCheckRoutine;
+  @Autowired HealthCheckService healthCheckService;
 
   @InjectWireMock("first-service")
   WireMockServer firstService;
@@ -149,7 +149,7 @@ class SingleServiceTestSuite {
 
     serviceRegistryService.registerService(registerServiceRequest);
 
-    healthCheckRoutine.checkHealth();
+    healthCheckService.checkHealth();
 
     Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
   }
@@ -164,7 +164,7 @@ class SingleServiceTestSuite {
 
     serviceRegistryService.registerService(registerServiceRequest);
 
-    healthCheckRoutine.checkHealth();
+    healthCheckService.checkHealth();
 
     Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
   }
@@ -179,7 +179,7 @@ class SingleServiceTestSuite {
 
     serviceRegistryService.registerService(registerServiceRequest);
 
-    healthCheckRoutine.checkHealth();
+    healthCheckService.checkHealth();
 
     Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
   }

@@ -5,7 +5,9 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 public enum Key {
-  INSTANCE_ENTITY("instanceEntity");
+  INSTANCE_ENTITY("instanceEntity"),
+  HEALTH_QUEUE_ENTITY("healthQueueChannel");
+
   final String name;
 
   Key(String name) {

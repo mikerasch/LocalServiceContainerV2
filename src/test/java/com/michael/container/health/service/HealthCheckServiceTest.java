@@ -1,4 +1,4 @@
-package com.michael.container.health.routine;
+package com.michael.container.health.service;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -18,8 +18,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class HealthCheckRoutineTest {
-  @InjectMocks HealthCheckRoutine routine;
+class HealthCheckServiceTest {
+  @InjectMocks HealthCheckService routine;
 
   @Mock ServiceRegistryService registryService;
 

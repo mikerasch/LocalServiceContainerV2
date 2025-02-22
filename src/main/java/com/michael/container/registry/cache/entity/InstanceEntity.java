@@ -23,6 +23,10 @@ public class InstanceEntity {
   private Map<Tag, String> metaData;
   @TimeToLive private Long timeToLive;
 
+  public InstanceEntity() {
+
+  }
+
   public InstanceEntity(String applicationName, int applicationVersion, String url, int port) {
     this.compositeKey = formCompositeKey(applicationName, applicationVersion, url, port);
     this.applicationName = applicationName;

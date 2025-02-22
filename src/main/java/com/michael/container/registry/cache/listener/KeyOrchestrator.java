@@ -16,7 +16,7 @@ public class KeyOrchestrator implements MessageListener {
 
   @Override
   public void onMessage(Message message, byte[] pattern) {
-    String keyTable = new String(message.getBody()).split(":")[0];
+    String keyTable = new String(pattern).split(":")[0];
 
     Key key = Key.from(keyTable).orElse(null);
 
