@@ -44,15 +44,8 @@ public class CrudRegistry {
       applicationEntity = new ApplicationEntity();
     }
 
-    var instanceEntity =
-        new InstanceEntity(
-            registerServiceResponse.applicationName(),
-            registerServiceResponse.applicationVersion(),
-            registerServiceResponse.url(),
-            registerServiceResponse.port());
+    var instanceEntity = conversionService.convert(registerServiceResponse, InstanceEntity.class);
 
-    instanceEntity.setDependsOn(registerServiceResponse.dependsOn());
-    instanceEntity.setMetaData(registerServiceResponse.metaData());
     instanceRepository.save(instanceEntity);
 
     applicationEntity.setApplicationName(registerServiceResponse.applicationName());
