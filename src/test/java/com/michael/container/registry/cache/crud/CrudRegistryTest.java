@@ -1,6 +1,5 @@
 package com.michael.container.registry.cache.crud;
 
-import com.michael.container.registry.cache.RegistryCache;
 import com.michael.container.registry.model.DurationValue;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import java.time.Instant;

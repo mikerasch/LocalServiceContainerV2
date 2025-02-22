@@ -1,11 +1,7 @@
 package com.michael.container.health.routine;
 
 import com.michael.container.health.client.HealthCheckClient;
-import com.michael.container.health.exception.HealthCheckInvalidException;
-import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,29 +22,29 @@ public class HealthCheckRoutine {
 
   @Scheduled(fixedRate = 30000)
   public void checkHealth() {
-    logger.info("Starting health check routine.");
-    registryService.fetchAll().values().stream()
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet())
-        .parallelStream()
-        .forEach(
-            serviceResponse -> {
-              String healthCheckUrl =
-                  HEALTH_CHECK_URL.formatted(serviceResponse.url(), serviceResponse.port());
-              try {
-                healthCheckClient.checkHealth(healthCheckUrl);
-              } catch (HealthCheckInvalidException healthCheckInvalidException) {
-                logger.error(
-                    "Health check failed for service '{}'. Error: {}",
-                    healthCheckUrl,
-                    healthCheckInvalidException.getMessage());
-                registryService.removeService(
-                    new RemoveServiceRequest(
-                        serviceResponse.applicationName(),
-                        serviceResponse.url(),
-                        serviceResponse.applicationVersion(),
-                        serviceResponse.port()));
-              }
-            });
+    //    logger.info("Starting health check routine.");
+    //    registryService.fetchAll().values().stream()
+    //        .flatMap(Collection::stream)
+    //        .collect(Collectors.toSet())
+    //        .parallelStream()
+    //        .forEach(
+    //            serviceResponse -> {
+    //              String healthCheckUrl =
+    //                  HEALTH_CHECK_URL.formatted(serviceResponse.url(), serviceResponse.port());
+    //              try {
+    //                healthCheckClient.checkHealth(healthCheckUrl);
+    //              } catch (HealthCheckInvalidException healthCheckInvalidException) {
+    //                logger.error(
+    //                    "Health check failed for service '{}'. Error: {}",
+    //                    healthCheckUrl,
+    //                    healthCheckInvalidException.getMessage());
+    //                registryService.removeService(
+    //                    new RemoveServiceRequest(
+    //                        serviceResponse.applicationName(),
+    //                        serviceResponse.url(),
+    //                        serviceResponse.applicationVersion(),
+    //                        serviceResponse.port()));
+    //              }
+    //            });
   }
 }

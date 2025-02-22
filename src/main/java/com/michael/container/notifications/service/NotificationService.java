@@ -4,6 +4,7 @@ import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.exception.NotificationException;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.registry.cache.crud.CrudRegistry;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public abstract class NotificationService {
 
   protected void notifyServicesOfEvent(ServiceNotificationRequest serviceNotificationRequest) {
     crudRegistry.fetchAll().values().parallelStream()
-        .flatMap(serviceMap -> serviceMap.keySet().parallelStream())
+        .flatMap(Collection::parallelStream)
         .filter(
             registerServiceResponse ->
                 registerServiceResponse

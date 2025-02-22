@@ -3,7 +3,6 @@ package com.michael.container.notifications.service;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotificationType;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
-import com.michael.container.registry.cache.RegistryCache;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.model.DurationValue;
 import com.michael.container.registry.model.RegisterServiceResponse;
