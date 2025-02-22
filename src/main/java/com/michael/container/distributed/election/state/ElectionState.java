@@ -2,10 +2,9 @@ package com.michael.container.distributed.election.state;
 
 import com.michael.container.distributed.election.enums.Role;
 import io.etcd.jetcd.support.CloseableClient;
-import org.springframework.stereotype.Component;
-
 import java.io.Closeable;
 import java.io.IOException;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ElectionState {

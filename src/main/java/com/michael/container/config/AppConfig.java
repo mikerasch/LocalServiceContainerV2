@@ -5,7 +5,8 @@ import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.enums.Key;
 import com.michael.container.registry.cache.listener.KeyOrchestrator;
 import io.etcd.jetcd.Client;
-import jakarta.validation.constraints.Pattern;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,9 +17,6 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Component
 @EnableScheduling
@@ -35,7 +33,8 @@ public class AppConfig {
     RedisTemplate<?, ?> template = new RedisTemplate<>();
     template.setKeySerializer(new StringRedisSerializer());
     template.setConnectionFactory(connectionFactory);
-    Jackson2JsonRedisSerializer<ApplicationEntity> serializer = new Jackson2JsonRedisSerializer<>(ApplicationEntity.class);
+    Jackson2JsonRedisSerializer<ApplicationEntity> serializer =
+        new Jackson2JsonRedisSerializer<>(ApplicationEntity.class);
     template.setValueSerializer(serializer);
     template.setHashValueSerializer(serializer);
     return template;
@@ -47,7 +46,8 @@ public class AppConfig {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
     container.setConnectionFactory(redisConnectionFactory);
     container.addMessageListener(keyOrchestrator, new ChannelTopic("__keyevent@0__:expired"));
-    container.addMessageListener(keyOrchestrator, new PatternTopic(Key.HEALTH_QUEUE_ENTITY.getName()));
+    container.addMessageListener(
+        keyOrchestrator, new PatternTopic(Key.HEALTH_QUEUE_ENTITY.getName()));
     return container;
   }
 

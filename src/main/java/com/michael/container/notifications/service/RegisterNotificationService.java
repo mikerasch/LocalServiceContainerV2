@@ -67,7 +67,7 @@ public class RegisterNotificationService extends NotificationService {
   private void sendInformationOnDependency(
       ServiceNotificationRequest serviceNotificationRequest, String dependencyApplicationName) {
     Set<RegisterServiceResponse> dependencies =
-        crudRegistry.fetchAll().getOrDefault(dependencyApplicationName, new HashSet<>());
+        crudRegistry.findByApplicationName(dependencyApplicationName);
 
     if (dependencies.isEmpty()) {
       logger.info(

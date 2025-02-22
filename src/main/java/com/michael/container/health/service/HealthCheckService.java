@@ -6,12 +6,11 @@ import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.ExecutorService;
 
 @Service
 public class HealthCheckService {
@@ -23,14 +22,14 @@ public class HealthCheckService {
   private final ExecutorService healthCheckExecutorService;
 
   public HealthCheckService(
-          ServiceRegistryService registryService,
-          HealthCheckClient healthCheckClient,
-          HealthQueueRepository healthQueueRepository,
-          @Qualifier("healthCheckExecutorService") ExecutorService healthCheckExecutorService) {
+      ServiceRegistryService registryService,
+      HealthCheckClient healthCheckClient,
+      HealthQueueRepository healthQueueRepository,
+      @Qualifier("healthCheckExecutorService") ExecutorService healthCheckExecutorService) {
     this.registryService = registryService;
     this.healthCheckClient = healthCheckClient;
     this.healthQueueRepository = healthQueueRepository;
-      this.healthCheckExecutorService = healthCheckExecutorService;
+    this.healthCheckExecutorService = healthCheckExecutorService;
   }
 
   public void performCheck() {

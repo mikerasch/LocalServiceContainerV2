@@ -8,11 +8,13 @@ import com.michael.container.registry.model.DeregisterEvent;
 import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -21,14 +23,17 @@ public class CrudRegistry {
   private final ApplicationEventPublisher eventPublisher;
   private final ApplicationRepository applicationRepository;
   private final InstanceRepository instanceRepository;
+  private final ConversionService conversionService;
 
   public CrudRegistry(
       ApplicationEventPublisher eventPublisher,
       ApplicationRepository applicationRepository,
-      InstanceRepository instanceRepository) {
+      InstanceRepository instanceRepository,
+      ConversionService conversionService) {
     this.eventPublisher = eventPublisher;
     this.applicationRepository = applicationRepository;
     this.instanceRepository = instanceRepository;
+    this.conversionService = conversionService;
   }
 
   public void insert(RegisterServiceResponse registerServiceResponse) {
@@ -73,13 +78,7 @@ public class CrudRegistry {
           applicationEntity.getInstanceEntities().stream()
               .map(
                   instanceEntity ->
-                      new RegisterServiceResponse(
-                          instanceEntity.getApplicationName(),
-                          instanceEntity.getApplicationVersion(),
-                          instanceEntity.getUrl(),
-                          instanceEntity.getPort(),
-                          instanceEntity.getDependsOn(),
-                          instanceEntity.getMetaData()))
+                      conversionService.convert(instanceEntity, RegisterServiceResponse.class))
               .collect(Collectors.toSet());
 
       result.put(applicationEntity.getApplicationName(), registerServiceResponses);
@@ -88,19 +87,24 @@ public class CrudRegistry {
     return result;
   }
 
+  public Set<RegisterServiceResponse> findByApplicationName(String applicationName) {
+    ApplicationEntity applicationEntity =
+        applicationRepository.findById(applicationName).orElse(null);
+
+    if (applicationEntity == null) {
+      return new HashSet<>();
+    }
+
+    return applicationEntity.getInstanceEntities().stream()
+        .map(entity -> conversionService.convert(entity, RegisterServiceResponse.class))
+        .collect(Collectors.toSet());
+  }
+
   public Optional<RegisterServiceResponse> findOne(
       String applicationName, String url, int port, int version) {
     return instanceRepository
         .findById(InstanceEntity.formCompositeKey(applicationName, version, url, port))
-        .map(
-            entity ->
-                new RegisterServiceResponse(
-                    entity.getApplicationName(),
-                    entity.getApplicationVersion(),
-                    entity.getUrl(),
-                    entity.getPort(),
-                    entity.getDependsOn(),
-                    entity.getMetaData()));
+        .map(entity -> conversionService.convert(entity, RegisterServiceResponse.class));
   }
 
   public void remove(String applicationName, String url, int applicationVersion, int port) {
