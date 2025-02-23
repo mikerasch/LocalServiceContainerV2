@@ -43,7 +43,7 @@ services:
   service-registry:
     environment:
       - ETCD_URLS=http://etcd:2379
-      - REDIS_HOST=http://redis
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
     build:
       context: .
