@@ -57,6 +57,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.redis.testcontainers</groupId>
+            <artifactId>testcontainers-redis</artifactId>
+            <version>1.6.4</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.wiremock.integrations</groupId>
             <artifactId>wiremock-spring-boot</artifactId>
             <version>3.6.0</version>
@@ -73,6 +80,14 @@
             <artifactId>jetcd-core</artifactId>
             <version>0.8.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-launcher</artifactId>
+            <version>0.8.4</version>
+            <scope>test</scope>
+        </dependency>
+
 
         <dependency>
             <groupId>jakarta.validation</groupId>

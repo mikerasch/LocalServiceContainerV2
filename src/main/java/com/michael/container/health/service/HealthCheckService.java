@@ -3,7 +3,7 @@ package com.michael.container.health.service;
 import com.michael.container.health.client.HealthCheckClient;
 import com.michael.container.health.exception.HealthCheckInvalidException;
 import com.michael.container.health.repositories.HealthQueueRepository;
-import com.michael.container.registry.cache.entity.ApplicationEntity;
+import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.concurrent.ExecutorService;
@@ -33,20 +33,20 @@ public class HealthCheckService {
   }
 
   public void performCheck() {
-    ApplicationEntity applicationEntity;
+    HealthQueueEntity healthQueueEntity;
     do {
-      applicationEntity = healthQueueRepository.dequeue();
-      ApplicationEntity finalApplicationEntity = applicationEntity;
-      healthCheckExecutorService.submit(() -> sendRequest(finalApplicationEntity));
+      healthQueueEntity = healthQueueRepository.dequeue();
+      HealthQueueEntity finalHealthQueueEntity = healthQueueEntity;
+      healthCheckExecutorService.submit(() -> sendRequest(finalHealthQueueEntity));
 
-    } while (applicationEntity != null);
+    } while (healthQueueEntity != null);
   }
 
-  private void sendRequest(ApplicationEntity applicationEntity) {
-    if (applicationEntity == null) {
+  private void sendRequest(HealthQueueEntity healthQueueEntity) {
+    if (healthQueueEntity == null) {
       return;
     }
-    applicationEntity.getInstanceEntities().stream()
+    healthQueueEntity.getBaseInstanceList().stream()
         .parallel()
         .forEach(
             serviceResponse -> {

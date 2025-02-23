@@ -10,15 +10,10 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
 @RedisHash("instanceEntity")
-public class InstanceEntity {
+public class InstanceEntity extends BaseInstance {
 
   // Composite key field (derived from applicationName + applicationVersion + url + port)
   @Id private String compositeKey;
-
-  private String applicationName;
-  private int applicationVersion;
-  private String url;
-  private int port;
   private Set<String> dependsOn;
   private Map<Tag, String> metaData;
   @TimeToLive private Long timeToLive;
@@ -26,11 +21,8 @@ public class InstanceEntity {
   public InstanceEntity() {}
 
   public InstanceEntity(String applicationName, int applicationVersion, String url, int port) {
+    super(applicationName, applicationVersion, url, port);
     this.compositeKey = formCompositeKey(applicationName, applicationVersion, url, port);
-    this.applicationName = applicationName;
-    this.applicationVersion = applicationVersion;
-    this.url = url;
-    this.port = port;
     refreshTTL();
   }
 
@@ -49,38 +41,6 @@ public class InstanceEntity {
 
   public void setCompositeKey(String compositeKey) {
     this.compositeKey = compositeKey;
-  }
-
-  public String getApplicationName() {
-    return applicationName;
-  }
-
-  public void setApplicationName(String applicationName) {
-    this.applicationName = applicationName;
-  }
-
-  public int getApplicationVersion() {
-    return applicationVersion;
-  }
-
-  public void setApplicationVersion(int applicationVersion) {
-    this.applicationVersion = applicationVersion;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
-  public int getPort() {
-    return port;
-  }
-
-  public void setPort(int port) {
-    this.port = port;
   }
 
   public Set<String> getDependsOn() {

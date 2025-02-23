@@ -29,7 +29,7 @@ public class RegisterNotificationService extends NotificationService {
   @Override
   public void notify(ServiceNotificationRequest serviceNotificationRequest) {
     notifyServicesOfEvent(serviceNotificationRequest);
-    // since this is a new service, we also need to notify it of it's dependencies
+    // since this is a new service, we also need to notify it of its dependencies
     RegisterServiceResponse registerServiceResponse =
         crudRegistry
             .findOne(

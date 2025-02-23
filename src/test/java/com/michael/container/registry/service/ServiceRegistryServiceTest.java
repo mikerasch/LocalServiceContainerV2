@@ -2,11 +2,9 @@ package com.michael.container.registry.service;
 
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.mapper.RegisterServiceRequestToRegisterServiceResponseMapper;
-import com.michael.container.registry.model.DurationValue;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,10 +51,7 @@ class ServiceRegistryServiceTest {
         new RegisterServiceResponse(
             "applicationName", 1, "localhost", 8080, new HashSet<>(), new HashMap<>());
     Mockito.when(crudRegistry.fetchAll())
-        .thenReturn(
-            Map.of(
-                "applicationName",
-                Map.of(registerServiceResponse, new DurationValue(Instant.now()))));
+        .thenReturn(Map.of("applicationName", Set.of(registerServiceResponse)));
 
     Set<RegisterServiceResponse> response =
         registryService.fetchAll().values().stream()

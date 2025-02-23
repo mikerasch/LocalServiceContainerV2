@@ -5,6 +5,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.michael.container.IntegrationTestExtension;
+import com.michael.container.health.routines.HealthCheckRoutine;
 import com.michael.container.health.service.HealthCheckService;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
@@ -15,11 +17,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -32,9 +36,8 @@ import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableWireMock({@ConfigureWireMock(name = "first-service")})
-class SingleServiceTestSuite {
+class SingleServiceTestSuite extends IntegrationTestExtension {
   @Autowired ObjectMapper objectMapper;
 
   @Autowired TestRestTemplate testRestTemplate;
@@ -42,6 +45,12 @@ class SingleServiceTestSuite {
   @Autowired ServiceRegistryService serviceRegistryService;
 
   @Autowired HealthCheckService healthCheckService;
+
+  @Autowired
+  @Qualifier("healthCheckExecutorService")
+  ExecutorService executorService;
+
+  @Autowired HealthCheckRoutine healthCheckRoutine;
 
   @InjectWireMock("first-service")
   WireMockServer firstService;
@@ -52,7 +61,7 @@ class SingleServiceTestSuite {
   HttpHeaders headers;
 
   @BeforeEach
-  void setup() {
+  public void setUp() {
     headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -139,23 +148,27 @@ class SingleServiceTestSuite {
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DeRegister() {
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DeRegister()
+      throws InterruptedException {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
             "first-service", 1, wireMockUrl, wireMockPort, new HashSet<>(), new HashMap<>());
 
     stubFor(
-        get(urlEqualTo("/health")).willReturn(aResponse().withFixedDelay(5000).withStatus(200)));
+        get(urlEqualTo("/health")).willReturn(aResponse().withFixedDelay(10000).withStatus(200)));
 
     serviceRegistryService.registerService(registerServiceRequest);
 
-    healthCheckService.checkHealth();
+    healthCheckService.performCheck();
+
+    executorService.awaitTermination(4, TimeUnit.SECONDS);
 
     Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToNot200_DeRegister() {
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToNot200_DeRegister()
+      throws InterruptedException {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
             "first-service", 1, wireMockUrl, wireMockPort, new HashSet<>(), new HashMap<>());
@@ -163,8 +176,11 @@ class SingleServiceTestSuite {
     stubFor(get(urlEqualTo("/health")).willReturn(aResponse().withStatus(404)));
 
     serviceRegistryService.registerService(registerServiceRequest);
+    healthCheckRoutine.populateHealthCheckQueue();
 
-    healthCheckService.checkHealth();
+    healthCheckService.performCheck();
+
+    executorService.awaitTermination(5, TimeUnit.SECONDS);
 
     Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
   }
@@ -179,7 +195,7 @@ class SingleServiceTestSuite {
 
     serviceRegistryService.registerService(registerServiceRequest);
 
-    healthCheckService.checkHealth();
+    healthCheckService.performCheck();
 
     Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
   }
