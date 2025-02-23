@@ -3,32 +3,27 @@ package com.michael.container.integration.suite;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.michael.container.registry.cache.RegistryCache;
+import com.michael.container.IntegrationTestExtension;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableWireMock({
   @ConfigureWireMock(name = "first-service"),
   @ConfigureWireMock(name = "second-service")
 })
-class MultipleServiceTestSuite {
+class MultipleServiceTestSuite extends IntegrationTestExtension {
   @Autowired ServiceRegistryService serviceRegistryService;
-
-  @Autowired RegistryCache registryCache;
 
   @InjectWireMock("first-service")
   WireMockServer firstService;
@@ -48,11 +43,6 @@ class MultipleServiceTestSuite {
     firstWireMockUrl = firstService.baseUrl().replace(":" + firstWireMockPort, "");
     secondWireMockPort = secondService.port();
     secondWireMockUrl = secondService.baseUrl().replace(":" + secondWireMockPort, "");
-  }
-
-  @AfterEach
-  void afterEach() {
-    registryCache.getApplicationToRegisterServiceMap().clear();
   }
 
   @Test

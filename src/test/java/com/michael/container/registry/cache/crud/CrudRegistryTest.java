@@ -1,12 +1,15 @@
 package com.michael.container.registry.cache.crud;
 
-import com.michael.container.registry.cache.RegistryCache;
-import com.michael.container.registry.model.DurationValue;
+import com.michael.container.RedisTestConfiguration;
+import com.michael.container.registry.cache.repositories.ApplicationRepository;
+import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.mapper.InstanceEntityToRegisterServiceResponseMapper;
+import com.michael.container.registry.mapper.RegisterServiceResponseToInstanceEntityMapper;
 import com.michael.container.registry.model.RegisterServiceResponse;
-import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,18 +17,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 @ExtendWith(MockitoExtension.class)
-class CrudRegistryTest {
+class CrudRegistryTest extends RedisTestConfiguration {
   CrudRegistry crudRegistry;
-  RegistryCache registryCache;
   @Mock ApplicationEventPublisher eventPublisher;
+  @Autowired ApplicationRepository applicationRepository;
+  @Autowired InstanceRepository instanceRepository;
 
   @BeforeEach
-  void setup() {
-    registryCache = new RegistryCache();
-    crudRegistry = new CrudRegistry(registryCache, eventPublisher);
+  void beforeEach() {
+    DefaultConversionService conversionService = new DefaultConversionService();
+    conversionService.addConverter(new RegisterServiceResponseToInstanceEntityMapper());
+    conversionService.addConverter(new InstanceEntityToRegisterServiceResponseMapper());
+    crudRegistry =
+        new CrudRegistry(
+            eventPublisher, applicationRepository, instanceRepository, conversionService);
   }
 
   @Test
@@ -37,8 +47,8 @@ class CrudRegistryTest {
     crudRegistry.insert(registerServiceResponse);
 
     Assertions.assertTrue(
-        registryCache.getApplicationToRegisterServiceMap().values().stream()
-            .flatMap(x -> x.keySet().stream())
+        crudRegistry.fetchAll().values().stream()
+            .flatMap(Collection::stream)
             .collect(Collectors.toSet())
             .contains(registerServiceResponse));
   }
@@ -50,17 +60,15 @@ class CrudRegistryTest {
             "applicationName", 1, "localhost", 8080, new HashSet<>(), new HashMap<>());
     crudRegistry.insert(registerServiceResponse);
 
-    Map<RegisterServiceResponse, DurationValue> response =
-        crudRegistry.fetchAll().get("applicationName");
+    Set<RegisterServiceResponse> response = crudRegistry.fetchAll().get("applicationName");
 
     Assertions.assertAll(
         () -> Assertions.assertEquals(1, response.size()),
-        () -> Assertions.assertTrue(response.containsKey(registerServiceResponse)));
+        () -> Assertions.assertTrue(response.contains(registerServiceResponse)));
 
-    response.put(
+    response.add(
         new RegisterServiceResponse(
-            "applicationName", 1, "test", 9090, new HashSet<>(), new HashMap<>()),
-        new DurationValue(Instant.now()));
+            "applicationName", 1, "test", 9090, new HashSet<>(), new HashMap<>()));
 
     Assertions.assertEquals(1, crudRegistry.fetchAll().size());
   }
@@ -98,7 +106,7 @@ class CrudRegistryTest {
 
     Assertions.assertTrue(
         crudRegistry.fetchAll().values().stream()
-            .flatMap(x -> x.keySet().stream())
+            .flatMap(Collection::stream)
             .collect(Collectors.toSet())
             .isEmpty());
   }

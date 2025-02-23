@@ -1,4 +1,22 @@
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        redis-server --notify-keyspace-events 'Ex' &&
+        tail -f /dev/null
+      "
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
   etcd:
     image: quay.io/coreos/etcd:v3.5.16
     entrypoint: /usr/local/bin/etcd
@@ -25,6 +43,8 @@ services:
   service-registry:
     environment:
       - ETCD_URLS=http://etcd:2379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     build:
       context: .
       dockerfile: Dockerfile
@@ -40,6 +60,8 @@ services:
       start_period: 40s
     depends_on:
       etcd:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   newman:

@@ -36,7 +36,6 @@ public class ServiceRegistryController {
     registryService.registerService(registerServiceRequest);
   }
 
-  // TODO fetch all needs to know if expired or not.
   @GetMapping
   @Operation(
       summary = "Fetches all services, including: expired and not-expired registered services.")

@@ -1,13 +1,15 @@
 package com.michael.container.notifications.service;
 
+import com.michael.container.RedisTestConfiguration;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotificationType;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
-import com.michael.container.registry.cache.RegistryCache;
 import com.michael.container.registry.cache.crud.CrudRegistry;
-import com.michael.container.registry.model.DurationValue;
+import com.michael.container.registry.cache.repositories.ApplicationRepository;
+import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.mapper.InstanceEntityToRegisterServiceResponseMapper;
+import com.michael.container.registry.mapper.RegisterServiceResponseToInstanceEntityMapper;
 import com.michael.container.registry.model.RegisterServiceResponse;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,25 +22,34 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@DataRedisTest
 // TODO CLEAN UP TO FIXTURES
-class RegisterNotificationServiceTest {
+class RegisterNotificationServiceTest extends RedisTestConfiguration {
   RegisterNotificationService service;
 
   CrudRegistry crudRegistry;
-  RegistryCache registryCache;
 
   @Mock NotificationClient notificationClient;
 
   @Mock ApplicationEventPublisher publisher;
+  @Autowired ApplicationRepository applicationRepository;
+  @Autowired InstanceRepository instanceRepository;
 
   @BeforeEach
-  void setup() {
-    registryCache = new RegistryCache();
-    crudRegistry = new CrudRegistry(registryCache, publisher);
+  void beforeEach() {
+    DefaultConversionService defaultConversionService = new DefaultConversionService();
+    defaultConversionService.addConverter(new RegisterServiceResponseToInstanceEntityMapper());
+    defaultConversionService.addConverter(new InstanceEntityToRegisterServiceResponseMapper());
+    crudRegistry =
+        new CrudRegistry(
+            publisher, applicationRepository, instanceRepository, defaultConversionService);
     service = new RegisterNotificationService(notificationClient, crudRegistry);
   }
 
@@ -47,26 +58,20 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication",
-                2,
-                "10.10.10.11",
-                8080,
-                Set.of("applicationName"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Set.of("applicationName"),
+            new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
@@ -80,37 +85,28 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication",
-                2,
-                "10.10.10.11",
-                8080,
-                Set.of("applicationName"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherOtherApplication",
-                2,
-                "10.10.10.12",
-                8080,
-                Set.of("applicationName"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Set.of("applicationName"),
+            new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherOtherApplication",
+            2,
+            "10.10.10.12",
+            8080,
+            Set.of("applicationName"),
+            new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
@@ -123,26 +119,20 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName",
-                1,
-                "10.10.10.10",
-                8080,
-                Set.of("someOtherApplication"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Set.of("someOtherApplication"),
+            new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
@@ -156,32 +146,23 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName",
-                1,
-                "10.10.10.10",
-                8080,
-                Set.of("someOtherApplication", "someOtherOtherApplication"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Set.of("someOtherApplication", "someOtherOtherApplication"),
+            new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
@@ -195,26 +176,20 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName",
-                1,
-                "10.10.10.10",
-                8080,
-                Set.of("someOtherApplication", "someOtherOtherApplication"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Set.of("someOtherApplication", "someOtherOtherApplication"),
+            new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
@@ -234,36 +209,27 @@ class RegisterNotificationServiceTest {
     ServiceNotificationRequest serviceNotificationRequest =
         new ServiceNotificationRequest(
             NotificationType.SERVICE_REGISTERED, "applicationName", "10.10.10.10", 1, 8080);
-    Map<String, Map<RegisterServiceResponse, DurationValue>> map = new HashMap<>();
-    map.put(
-        "applicationName",
-        Map.of(
-            new RegisterServiceResponse(
-                "applicationName",
-                1,
-                "10.10.10.10",
-                8080,
-                Set.of("someOtherApplication", "someOtherOtherApplication"),
-                new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    map.put(
-        "someOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
+    Set<RegisterServiceResponse> set = new HashSet<>();
+    set.add(
+        new RegisterServiceResponse(
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Set.of("someOtherApplication", "someOtherOtherApplication"),
+            new HashMap<>()));
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
 
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.notify(serviceNotificationRequest);
 
-    map.put(
-        "someOtherOtherApplication",
-        Map.of(
-            new RegisterServiceResponse(
-                "someOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()),
-            new DurationValue(Instant.MAX)));
-    registryCache.getApplicationToRegisterServiceMap().putAll(map);
+    set.add(
+        new RegisterServiceResponse(
+            "someOtherOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()));
+    set.forEach(response -> crudRegistry.insert(response));
 
     service.processPendingNotifications();
 

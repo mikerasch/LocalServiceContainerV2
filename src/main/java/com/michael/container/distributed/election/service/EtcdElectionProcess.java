@@ -36,11 +36,12 @@ public class EtcdElectionProcess implements ElectionProcess {
   public EtcdElectionProcess(
       Client etcdClient,
       EtcdConfiguration etcdConfiguration,
-      ApplicationEventPublisher eventPublisher) {
+      ApplicationEventPublisher eventPublisher,
+      ElectionState electionState) {
     this.etcdClient = etcdClient;
     this.etcdConfiguration = etcdConfiguration;
-    this.electionState = new ElectionState();
     this.eventPublisher = eventPublisher;
+    this.electionState = electionState;
   }
 
   @Override

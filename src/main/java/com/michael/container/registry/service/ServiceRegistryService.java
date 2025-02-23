@@ -31,7 +31,7 @@ public class ServiceRegistryService {
   public Map<String, Set<RegisterServiceResponse>> fetchAll() {
     Map<String, Set<RegisterServiceResponse>> map = new ConcurrentHashMap<>();
 
-    crudRegistry.fetchAll().forEach((key, value) -> map.put(key, new HashSet<>(value.keySet())));
+    crudRegistry.fetchAll().forEach((key, value) -> map.put(key, new HashSet<>(value)));
 
     return map;
   }
