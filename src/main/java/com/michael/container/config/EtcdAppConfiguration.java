@@ -8,8 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EtcdAppConfiguration {
   @Bean
-  public Client etcdClient(
-      EtcdConfiguration etcdConfiguration) {
+  public Client etcdClient(EtcdConfiguration etcdConfiguration) {
     return Client.builder().endpoints(etcdConfiguration.getEtcdEndpoints()).build();
   }
 }
