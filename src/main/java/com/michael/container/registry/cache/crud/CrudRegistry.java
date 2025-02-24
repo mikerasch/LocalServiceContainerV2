@@ -4,6 +4,7 @@ import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.InstanceEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.DeregisterEvent;
 import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
@@ -15,6 +16,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,7 @@ import org.springframework.util.CollectionUtils;
 
 @Component
 public class CrudRegistry {
+  private static final Logger log = LoggerFactory.getLogger(CrudRegistry.class);
   private final ApplicationEventPublisher eventPublisher;
   private final ApplicationRepository applicationRepository;
   private final InstanceRepository instanceRepository;
@@ -55,7 +59,13 @@ public class CrudRegistry {
 
     var instanceEntity = conversionService.convert(registerServiceResponse, InstanceEntity.class);
 
-    instanceRepository.save(Objects.requireNonNull(instanceEntity));
+    if (Objects.requireNonNull(instanceEntity).getStatus() == null) {
+      // The initial status is ALWAYS starting.
+      // It will transition to the next status upon first successful heartbeat.
+      instanceEntity.setStatus(Status.STARTING);
+    }
+
+    instanceRepository.save(instanceEntity);
 
     applicationEntity.setApplicationName(registerServiceResponse.applicationName());
     applicationEntity.addAllInstanceEntities(instanceEntity);
@@ -145,5 +155,66 @@ public class CrudRegistry {
 
     eventPublisher.publishEvent(
         new DeregisterEvent(applicationName, url, applicationVersion, port));
+  }
+
+  public void updateTTL(
+      @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
+    // TODO THROW BETTER
+    InstanceEntity instanceEntity =
+        instanceRepository
+            .findById(
+                InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port))
+            .orElseThrow();
+
+    instanceEntity.refreshTTL();
+
+    if (Status.HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS.contains(instanceEntity.getStatus())) {
+      instanceEntity.setStatus(Status.HEALTHY);
+      log.debug(
+          "Instance for application '{}', version '{}', url '{}', port '{}' transitioning from {} to HEALTHY.",
+          applicationName,
+          applicationVersion,
+          url,
+          port,
+          instanceEntity.getStatus());
+    }
+    instanceRepository.save(instanceEntity);
+  }
+
+  public void updateStatusOnService(
+      @Nonnull String applicationName,
+      @Nonnull String url,
+      int applicationVersion,
+      int port,
+      @Nonnull Status status) {
+    // TODO THROW BETTER
+    InstanceEntity instanceEntity =
+        instanceRepository
+            .findById(
+                InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port))
+            .orElseThrow();
+
+    instanceEntity.setStatus(status);
+
+    if (status == Status.UNDER_MAINTENANCE) {
+      // TODO REMOVE MAGIC NUMBER
+      instanceEntity.setTimeToLive(5400L);
+      log.info(
+          "Service '{}' version {} at {}:{} is transitioning to maintenance mode. TTL extended to 90 minutes (5400 seconds).",
+          applicationName,
+          applicationVersion,
+          url,
+          port);
+    }
+
+    log.debug(
+        "Updating status of instance with applicationName: {}, version: {}, url: {}, port: {} to status: {}",
+        applicationName,
+        applicationVersion,
+        url,
+        port,
+        status);
+
+    instanceRepository.save(instanceEntity);
   }
 }
