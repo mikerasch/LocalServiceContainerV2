@@ -7,6 +7,7 @@ import com.michael.container.registry.cache.repositories.InstanceRepository;
 import com.michael.container.registry.model.DeregisterEvent;
 import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,8 +15,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.annotation.Nonnull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -133,7 +132,8 @@ public class CrudRegistry {
    * from the repository. Finally, a {@link DeregisterEvent} is published to notify other components of the
    * service deregistration.
    */
-  public void remove(@Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
+  public void remove(
+      @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
     instanceRepository.deleteById(
         InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port));
 
