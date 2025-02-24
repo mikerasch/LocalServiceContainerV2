@@ -44,22 +44,32 @@ public class EtcdElectionProcess implements ElectionProcess {
     this.electionState = electionState;
   }
 
+  /**
+   * This will revoke the lease from this server, resulting in a removal of the election key. This
+   * will also trigger various cleanup actions of the election state.
+   */
   @Override
   public void releaseLeadership() {
     try {
-      etcdClient.getLeaseClient().revoke(electionState.getLeaseId()).get();
+      if (electionState.getRole() == Role.LEADER) {
+        etcdClient.getLeaseClient().revoke(electionState.getLeaseId()).get();
+      }
       electionState.reset();
     } catch (ExecutionException | InterruptedException | IOException e) {
       logger.warn("Release leadership exception.", e);
     }
   }
 
+  /**
+   * Starts the leader election process:
+   * 1) Create a new lease for 5 seconds.
+   * 2) Fetch the ETCD Key and Value (Key is shared; Value is unique to the instance).
+   * 3) Create a "put" option with the leaseId. This will only succeed if there is no existing leader key.
+   * 4) If the "put" operation succeeds, initiate a new lease renewal process to keep the key alive.
+   * 5) Listen for the leader key's deletion, and if deleted, start a new election process.
+   */
   @Override
   public void startLeaderElection() {
-    determineRole();
-  }
-
-  private void determineRole() {
     boolean acquiredLeadership = false;
     LeaseGrantResponse leaseResponse = etcdClient.getLeaseClient().grant(5L).join();
     electionState.setLeaseId(leaseResponse.getID());
@@ -74,6 +84,7 @@ public class EtcdElectionProcess implements ElectionProcess {
     PutOption putOption = PutOption.builder().withLeaseId(electionState.getLeaseId()).build();
 
     try {
+      // Try and be efficient, we wrap all the computations into one request
       TxnResponse txnResponse =
           etcdClient
               .getKVClient()

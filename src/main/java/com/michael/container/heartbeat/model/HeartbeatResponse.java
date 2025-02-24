@@ -1,5 +1,6 @@
 package com.michael.container.heartbeat.model;
 
 import com.michael.container.heartbeat.enums.HeartbeatEvent;
+import jakarta.annotation.Nonnull;
 
-public record HeartbeatResponse(HeartbeatEvent event, String description) {}
+public record HeartbeatResponse(@Nonnull HeartbeatEvent event, @Nonnull String description) {}
