@@ -6,6 +6,11 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * The key orchestator for all messages from Redis.
+ * Uses {@link KeyListener} supports method to direct messages to all KeyListeners
+ * which can handle the key.
+ */
 @Component
 public class KeyOrchestrator implements MessageListener {
   private final Set<KeyListener> keyListeners;

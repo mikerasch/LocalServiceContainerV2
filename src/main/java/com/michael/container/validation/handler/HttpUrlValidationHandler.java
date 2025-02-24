@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 
+
 public class HttpUrlValidationHandler implements ConstraintValidator<HttpUrl, String> {
   private static final int MINIMUM_PORT = 0;
   private static final int MAXIMUM_PORT = 65535;
