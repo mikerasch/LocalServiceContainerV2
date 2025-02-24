@@ -7,9 +7,11 @@ import com.michael.container.registry.cache.repositories.InstanceRepository;
 import com.michael.container.registry.model.DeregisterEvent;
 import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +38,14 @@ public class CrudRegistry {
     this.conversionService = conversionService;
   }
 
-  public void insert(RegisterServiceResponse registerServiceResponse) {
+  /**
+   * Inserts a new instance into the application repository or updates an existing one based on the provided
+   * {@link RegisterServiceResponse}. If the application does not already exist, a new application entity is created.
+   * After the instance is saved, it is added to the application entity, and the application is saved or updated.
+   * Additionally, an event of type {@link RegisterEvent} is published with the details from the
+   * {@link RegisterServiceResponse}, including the application name, URL, version, and port.
+   */
+  public void insert(@Nonnull RegisterServiceResponse registerServiceResponse) {
     var applicationEntity =
         applicationRepository.findById(registerServiceResponse.applicationName()).orElse(null);
 
@@ -46,7 +55,7 @@ public class CrudRegistry {
 
     var instanceEntity = conversionService.convert(registerServiceResponse, InstanceEntity.class);
 
-    instanceRepository.save(instanceEntity);
+    instanceRepository.save(Objects.requireNonNull(instanceEntity));
 
     applicationEntity.setApplicationName(registerServiceResponse.applicationName());
     applicationEntity.addAllInstanceEntities(instanceEntity);
@@ -61,6 +70,12 @@ public class CrudRegistry {
             registerServiceResponse.port()));
   }
 
+  /**
+   * Fetches all registered services and their corresponding instances.
+   * The resulting map is organized by the application name
+   * as the key, with a set of {@link RegisterServiceResponse} as the value, representing the instances of
+   * each service.
+   */
   public Map<String, Set<RegisterServiceResponse>> fetchAll() {
     Map<String, Set<RegisterServiceResponse>> result = new HashMap<>();
 
@@ -80,7 +95,11 @@ public class CrudRegistry {
     return result;
   }
 
-  public Set<RegisterServiceResponse> findByApplicationName(String applicationName) {
+  /**
+   * Finds and retrieves the registered service instances for a specific application.
+   * If no application is found for the given name, an empty set is returned.
+   */
+  public Set<RegisterServiceResponse> findByApplicationName(@Nonnull String applicationName) {
     ApplicationEntity applicationEntity =
         applicationRepository.findById(applicationName).orElse(null);
 
@@ -93,14 +112,28 @@ public class CrudRegistry {
         .collect(Collectors.toSet());
   }
 
+  /**
+   * Finds a single registered service instance based on application name, URL, port, and version.
+   * This method searches for a specific service instance using a composite key formed from the provided
+   * application name, URL, port.
+   */
   public Optional<RegisterServiceResponse> findOne(
-      String applicationName, String url, int port, int version) {
+      @Nonnull String applicationName, @Nonnull String url, int port, int version) {
     return instanceRepository
         .findById(InstanceEntity.formCompositeKey(applicationName, version, url, port))
         .map(entity -> conversionService.convert(entity, RegisterServiceResponse.class));
   }
 
-  public void remove(String applicationName, String url, int applicationVersion, int port) {
+  /**
+   * Removes a registered service instance and its associated application if necessary.
+   * This method deletes a service instance from the repository using a composite key formed from the provided
+   * application name, URL, application version, and port. After the instance is removed, it checks if there are
+   * any remaining instances for the application. If no instances are left, the application entity is also deleted
+   * from the repository. Finally, a {@link DeregisterEvent} is published to notify other components of the
+   * service deregistration.
+   */
+  public void remove(
+      @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
     instanceRepository.deleteById(
         InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port));
 
