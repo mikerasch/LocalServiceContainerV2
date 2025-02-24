@@ -4,6 +4,7 @@ import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import jakarta.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class RegisterNotificationService extends NotificationService {
   }
 
   @Override
-  public void notify(ServiceNotificationRequest serviceNotificationRequest) {
+  public void notify(@Nonnull ServiceNotificationRequest serviceNotificationRequest) {
     notifyServicesOfEvent(serviceNotificationRequest);
     // since this is a new service, we also need to notify it of its dependencies
     RegisterServiceResponse registerServiceResponse =

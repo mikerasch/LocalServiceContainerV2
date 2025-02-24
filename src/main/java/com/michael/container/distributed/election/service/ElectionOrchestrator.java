@@ -14,18 +14,24 @@ public class ElectionOrchestrator {
     this.electionProcess = electionProcess;
   }
 
+  /** Upon starting up of service, each service needs to start the leader election. */
   @PostConstruct
-  void postConstruct() {
+  public void postConstruct() {
     startLeaderElection();
   }
 
+  /** Upon removal of bean from context, we will release leadership if applicable. */
   @PreDestroy
-  void onDestroy() {
+  public void onDestroy() {
     electionProcess.releaseLeadership();
   }
 
+  /**
+   * Start leader election. A leader election does not necessarily mean it will pick a new leader,
+   * there is a short circuit to ensure if there is a current leader, nothing is needed.
+   */
   @EventListener(LeaderKeyDeletionEvent.class)
-  void startLeaderElection() {
+  public void startLeaderElection() {
     electionProcess.startLeaderElection();
   }
 }

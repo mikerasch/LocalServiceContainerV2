@@ -32,6 +32,11 @@ public class HealthCheckService {
     this.healthCheckExecutorService = healthCheckExecutorService;
   }
 
+  /**
+   * Continuously dequeues health check entities and submits them for health-check processing.
+   * The method runs in a loop until there are no more health check entities in the queue (i.e., the
+   * dequeued entity is null)
+   */
   public void performCheck() {
     HealthQueueEntity healthQueueEntity;
     do {

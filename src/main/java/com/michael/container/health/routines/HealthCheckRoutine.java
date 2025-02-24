@@ -32,6 +32,14 @@ public class HealthCheckRoutine {
     this.electionState = electionState;
   }
 
+  /**
+   * Periodically populates the health check queue with the application entities' health data.
+   * This method runs at a fixed rate (every 3 seconds) and collects all application entities from
+   * the repository. All entities will be translated to a health entity and added to the health entity queue
+   * for later processing.
+   * This method does not perform any action if the application entities list is empty or if the
+   * current role is {@link Role#FOLLOWER}.
+   */
   @Scheduled(fixedRate = 3000L)
   public void populateHealthCheckQueue() {
     List<ApplicationEntity> applicationEntities =
