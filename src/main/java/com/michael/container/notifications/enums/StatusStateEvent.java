@@ -1,5 +1,6 @@
-package com.michael.container.registry.enums;
+package com.michael.container.notifications.enums;
 
+import com.michael.container.registry.enums.Status;
 import jakarta.annotation.Nonnull;
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ public enum StatusStateEvent {
 ;
 
   public static Optional<StatusStateEvent> from(
-      @Nonnull Status previousStatus, @Nonnull Status newStatus) {
+          @Nonnull Status previousStatus, @Nonnull Status newStatus) {
     switch (newStatus) {
       case STARTING:
         if (previousStatus == Status.UNDER_MAINTENANCE) {

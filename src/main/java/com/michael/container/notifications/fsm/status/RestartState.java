@@ -1,6 +1,6 @@
-package com.michael.container.registry.cache.listener.status;
+package com.michael.container.notifications.fsm.status;
 
-import com.michael.container.registry.enums.StatusStateEvent;
+import com.michael.container.notifications.enums.StatusStateEvent;
 import com.michael.container.registry.model.StatusChangeEvent;
 import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Component;

@@ -1,10 +1,10 @@
-package com.michael.container.registry.cache.listener.status;
+package com.michael.container.notifications.fsm.status;
 
 import com.michael.container.notifications.enums.NotificationType;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.notifications.service.NotificationService;
 import com.michael.container.registry.enums.Status;
-import com.michael.container.registry.enums.StatusStateEvent;
+import com.michael.container.notifications.enums.StatusStateEvent;
 import com.michael.container.registry.model.StatusChangeEvent;
 import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;

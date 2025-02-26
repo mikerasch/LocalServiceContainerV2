@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.michael.container.utils.ContainerConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
@@ -40,7 +42,7 @@ public class InstanceEntity extends BaseInstance {
   }
 
   public void refreshTTL() {
-    timeToLive = 20L;
+    timeToLive = ContainerConstants.INSTANCE_ENTITY_DEFAULT_TIME_TO_LIVE;
   }
 
   public static String formCompositeKey(

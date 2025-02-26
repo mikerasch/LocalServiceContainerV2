@@ -48,8 +48,8 @@ public class CrudRegistry {
    * Inserts a new instance into the application repository or updates an existing one based on the provided
    * {@link RegisterServiceResponse}. If the application does not already exist, a new application entity is created.
    * After the instance is saved, it is added to the application entity, and the application is saved or updated.
-   * Additionally, an event of type {@link RegisterEvent} is published with the details from the
-   * {@link RegisterServiceResponse}, including the application name, URL, version, and port.
+   * Additionally, an event of type {@link StatusChangeEvent} is published with the details from the
+   * {@link RegisterServiceResponse}, including the application name, URL, version, before and after status change, and port.
    */
   public void insert(@Nonnull RegisterServiceResponse registerServiceResponse) {
     var applicationEntity =
