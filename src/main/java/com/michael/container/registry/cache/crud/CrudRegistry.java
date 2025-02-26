@@ -1,5 +1,6 @@
 package com.michael.container.registry.cache.crud;
 
+import com.michael.container.exceptions.ResourceNotFoundException;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.InstanceEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
@@ -8,6 +9,7 @@ import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.DeregisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.StatusChangeEvent;
+import com.michael.container.utils.ContainerConstants;
 import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -161,12 +163,8 @@ public class CrudRegistry {
 
   public void updateTTL(
       @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
-    // TODO THROW BETTER
     InstanceEntity instanceEntity =
-        instanceRepository
-            .findById(
-                InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port))
-            .orElseThrow();
+        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
 
     instanceEntity.refreshTTL();
 
@@ -196,23 +194,21 @@ public class CrudRegistry {
       boolean shouldFollowStateMachine) {
     // TODO THROW BETTER
     InstanceEntity instanceEntity =
-        instanceRepository
-            .findById(
-                InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port))
-            .orElseThrow();
+        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
+
     Status previousStatus = instanceEntity.getStatus();
 
     instanceEntity.setStatus(status);
 
     if (status == Status.UNDER_MAINTENANCE) {
-      // TODO REMOVE MAGIC NUMBER
-      instanceEntity.setTimeToLive(5400L);
+      instanceEntity.setTimeToLive(ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
       log.info(
-          "Service '{}' version {} at {}:{} is transitioning to maintenance mode. TTL extended to 90 minutes (5400 seconds).",
+          "Service '{}' version {} at {}:{} is transitioning to maintenance mode. TTL extended to 90 minutes ({} milli-seconds).",
           applicationName,
           applicationVersion,
           url,
-          port);
+          port,
+          ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
     }
 
     log.debug(
@@ -230,5 +226,18 @@ public class CrudRegistry {
           new StatusChangeEvent(
               applicationName, url, applicationVersion, port, previousStatus, status));
     }
+  }
+
+  private InstanceEntity findInstanceEntityOrElseThrow(
+      String applicationName, String url, int applicationVersion, int port) {
+    String instanceEntityCompositeKey =
+        InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port);
+    return instanceRepository
+        .findById(instanceEntityCompositeKey)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Instance not found with composite key %s"
+                        .formatted(instanceEntityCompositeKey)));
   }
 }
