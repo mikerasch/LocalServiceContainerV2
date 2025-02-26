@@ -46,12 +46,14 @@ public class ServiceRegistryService {
         removeServiceRequest.port());
   }
 
-  public void updateStatusOnService(@Nonnull UpdateStatusRequest updateStatusRequest) {
+  public void updateStatusOnService(
+      @Nonnull UpdateStatusRequest updateStatusRequest, boolean shouldFollowStateMachine) {
     crudRegistry.updateStatusOnService(
         updateStatusRequest.applicationName(),
         updateStatusRequest.url(),
         updateStatusRequest.applicationVersion(),
         updateStatusRequest.port(),
-        updateStatusRequest.status());
+        updateStatusRequest.status(),
+        shouldFollowStateMachine);
   }
 }

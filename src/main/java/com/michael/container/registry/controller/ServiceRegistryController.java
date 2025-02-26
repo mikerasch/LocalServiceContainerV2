@@ -60,6 +60,6 @@ public class ServiceRegistryController {
       summary =
           "Updates the status of a service. All dependent services will become aware of this transition.")
   public void updateStatusOnService(@RequestBody @Valid UpdateStatusRequest updateStatusRequest) {
-    registryService.updateStatusOnService(updateStatusRequest);
+    registryService.updateStatusOnService(updateStatusRequest, true);
   }
 }

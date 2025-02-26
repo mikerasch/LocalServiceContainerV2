@@ -1,8 +1,8 @@
 package com.michael.container.config;
 
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
-import com.michael.container.registry.cache.enums.Key;
-import com.michael.container.registry.cache.listener.KeyOrchestrator;
+import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
+import com.michael.container.registry.enums.Key;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -6,8 +6,8 @@ import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
 import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.DeregisterEvent;
-import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.container.registry.model.StatusChangeEvent;
 import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,8 +58,8 @@ public class CrudRegistry {
     }
 
     var instanceEntity = conversionService.convert(registerServiceResponse, InstanceEntity.class);
-
-    if (Objects.requireNonNull(instanceEntity).getStatus() == null) {
+    Status previousStatus = Objects.requireNonNull(instanceEntity).getStatus();
+    if (previousStatus == null) {
       // The initial status is ALWAYS starting.
       // It will transition to the next status upon first successful heartbeat.
       instanceEntity.setStatus(Status.STARTING);
@@ -73,11 +73,13 @@ public class CrudRegistry {
     applicationRepository.save(applicationEntity);
 
     eventPublisher.publishEvent(
-        new RegisterEvent(
+        new StatusChangeEvent(
             registerServiceResponse.applicationName(),
             registerServiceResponse.url(),
             registerServiceResponse.applicationVersion(),
-            registerServiceResponse.port()));
+            registerServiceResponse.port(),
+            previousStatus,
+            instanceEntity.getStatus()));
   }
 
   /**
@@ -169,14 +171,18 @@ public class CrudRegistry {
     instanceEntity.refreshTTL();
 
     if (Status.HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS.contains(instanceEntity.getStatus())) {
+      Status previousStatus = instanceEntity.getStatus();
       instanceEntity.setStatus(Status.HEALTHY);
+      eventPublisher.publishEvent(
+          new StatusChangeEvent(
+              applicationName, url, applicationVersion, port, previousStatus, Status.HEALTHY));
       log.debug(
           "Instance for application '{}', version '{}', url '{}', port '{}' transitioning from {} to HEALTHY.",
           applicationName,
           applicationVersion,
           url,
           port,
-          instanceEntity.getStatus());
+          previousStatus);
     }
     instanceRepository.save(instanceEntity);
   }
@@ -186,13 +192,15 @@ public class CrudRegistry {
       @Nonnull String url,
       int applicationVersion,
       int port,
-      @Nonnull Status status) {
+      @Nonnull Status status,
+      boolean shouldFollowStateMachine) {
     // TODO THROW BETTER
     InstanceEntity instanceEntity =
         instanceRepository
             .findById(
                 InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port))
             .orElseThrow();
+    Status previousStatus = instanceEntity.getStatus();
 
     instanceEntity.setStatus(status);
 
@@ -216,5 +224,11 @@ public class CrudRegistry {
         status);
 
     instanceRepository.save(instanceEntity);
+
+    if (shouldFollowStateMachine) {
+      eventPublisher.publishEvent(
+          new StatusChangeEvent(
+              applicationName, url, applicationVersion, port, previousStatus, status));
+    }
   }
 }

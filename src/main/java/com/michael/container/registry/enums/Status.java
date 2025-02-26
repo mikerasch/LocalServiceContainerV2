@@ -8,5 +8,5 @@ public enum Status {
   DOWN,
   UNDER_MAINTENANCE;
 
-  public static Set<Status> HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS = Set.of(STARTING, DOWN);
+  public static final Set<Status> HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS = Set.of(STARTING, DOWN);
 }
