@@ -1,6 +1,6 @@
 package com.michael.container.distributed.election.config;
 
-import com.michael.container.distributed.election.exception.UncheckedURISyntaxException;
+import com.michael.container.exceptions.UncheckedURISyntaxException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
