@@ -4,8 +4,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.michael.container.IntegrationTestExtension;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RemoveServiceRequest;
+import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,9 +67,16 @@ class MultipleServiceTestSuite extends IntegrationTestExtension {
             new HashMap<>());
     firstService.stubFor(
         post(urlEqualTo("/service-registration/notify")).willReturn(aResponse().withStatus(200)));
-
     serviceRegistryService.registerService(secondRegisterRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest(
+            "second-service", 1, secondWireMockUrl, secondWireMockPort, Status.HEALTHY),
+        true);
     serviceRegistryService.registerService(firstRegisterRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest(
+            "first-service", 1, firstWireMockUrl, firstWireMockPort, Status.HEALTHY),
+        true);
 
     verify(
         postRequestedFor(urlEqualTo("/service-registration/notify"))
@@ -97,6 +106,10 @@ class MultipleServiceTestSuite extends IntegrationTestExtension {
 
     serviceRegistryService.registerService(firstRegisterRequest);
     serviceRegistryService.registerService(secondRegisterRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest(
+            "second-service", 1, secondWireMockUrl, secondWireMockPort, Status.HEALTHY),
+        true);
 
     verify(
         postRequestedFor(urlEqualTo("/service-registration/notify"))
@@ -127,7 +140,15 @@ class MultipleServiceTestSuite extends IntegrationTestExtension {
         post(urlEqualTo("/service-registration/notify")).willReturn(aResponse().withStatus(200)));
 
     serviceRegistryService.registerService(firstRegisterRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest(
+            "first-service", 1, firstWireMockUrl, firstWireMockPort, Status.HEALTHY),
+        true);
     serviceRegistryService.registerService(secondRegisterRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest(
+            "second-service", 1, secondWireMockUrl, secondWireMockPort, Status.HEALTHY),
+        true);
 
     int firstServiceRequestCount =
         firstService

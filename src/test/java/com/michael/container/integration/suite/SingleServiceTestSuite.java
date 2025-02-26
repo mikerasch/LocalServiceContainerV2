@@ -8,9 +8,11 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.michael.container.IntegrationTestExtension;
 import com.michael.container.health.routines.HealthCheckRoutine;
 import com.michael.container.health.service.HealthCheckService;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
+import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.Collections;
 import java.util.HashMap;
@@ -93,7 +95,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
     Assertions.assertAll(
         () ->
             Assertions.assertTrue(
-                registerResponse.getStatusCode().isSameCodeAs(HttpStatus.NO_CONTENT)),
+                registerResponse.getStatusCode().isSameCodeAs(HttpStatus.CREATED)),
         () -> Assertions.assertEquals(1, fetchResponse.size()),
         () ->
             Assertions.assertTrue(
@@ -105,6 +107,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
                             1,
                             wireMockUrl,
                             wireMockPort,
+                            Status.STARTING,
                             new HashSet<>(),
                             new HashMap<>()))));
   }
@@ -143,12 +146,12 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
     Assertions.assertAll(
         () ->
             Assertions.assertTrue(
-                registerResponse.getStatusCode().isSameCodeAs(HttpStatus.NO_CONTENT)),
+                registerResponse.getStatusCode().isSameCodeAs(HttpStatus.CREATED)),
         () -> Assertions.assertEquals(0, fetchResponse.size()));
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DeRegister()
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DownStatus()
       throws InterruptedException {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
@@ -159,15 +162,19 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
 
     serviceRegistryService.registerService(registerServiceRequest);
 
+    healthCheckRoutine.populateHealthCheckQueue();
     healthCheckService.performCheck();
 
-    executorService.awaitTermination(4, TimeUnit.SECONDS);
+    executorService.awaitTermination(5, TimeUnit.SECONDS);
 
-    Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
+    Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
+    Assertions.assertTrue(
+        serviceRegistryService.fetchAll().get("first-service").stream()
+            .anyMatch(x -> x.status() == Status.DOWN));
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToNot200_DeRegister()
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToNot200_SetToDown()
       throws InterruptedException {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
@@ -176,13 +183,19 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
     stubFor(get(urlEqualTo("/health")).willReturn(aResponse().withStatus(404)));
 
     serviceRegistryService.registerService(registerServiceRequest);
+    serviceRegistryService.updateStatusOnService(
+        new UpdateStatusRequest("first-service", 1, wireMockUrl, wireMockPort, Status.HEALTHY),
+        true);
     healthCheckRoutine.populateHealthCheckQueue();
 
     healthCheckService.performCheck();
 
     executorService.awaitTermination(5, TimeUnit.SECONDS);
 
-    Assertions.assertEquals(0, serviceRegistryService.fetchAll().size());
+    Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
+    Assertions.assertTrue(
+        serviceRegistryService.fetchAll().get("first-service").stream()
+            .anyMatch(x -> x.status() == Status.DOWN));
   }
 
   @Test

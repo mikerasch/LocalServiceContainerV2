@@ -3,6 +3,7 @@ package com.michael.container.registry.cache.crud;
 import com.michael.container.RedisTestConfiguration;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.mapper.InstanceEntityToRegisterServiceResponseMapper;
 import com.michael.container.registry.mapper.RegisterServiceResponseToInstanceEntityMapper;
 import com.michael.container.registry.model.RegisterServiceResponse;
@@ -42,7 +43,13 @@ class CrudRegistryTest extends RedisTestConfiguration {
   void insert_InsertsIntoCache() {
     var registerServiceResponse =
         new RegisterServiceResponse(
-            "applicationName", 1, "localhost", 8080, new HashSet<>(), new HashMap<>());
+            "applicationName",
+            1,
+            "localhost",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>());
 
     crudRegistry.insert(registerServiceResponse);
 
@@ -57,7 +64,13 @@ class CrudRegistryTest extends RedisTestConfiguration {
   void fetchAll_RetrievesNewMap() {
     var registerServiceResponse =
         new RegisterServiceResponse(
-            "applicationName", 1, "localhost", 8080, new HashSet<>(), new HashMap<>());
+            "applicationName",
+            1,
+            "localhost",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>());
     crudRegistry.insert(registerServiceResponse);
 
     Set<RegisterServiceResponse> response = crudRegistry.fetchAll().get("applicationName");
@@ -68,7 +81,7 @@ class CrudRegistryTest extends RedisTestConfiguration {
 
     response.add(
         new RegisterServiceResponse(
-            "applicationName", 1, "test", 9090, new HashSet<>(), new HashMap<>()));
+            "applicationName", 1, "test", 9090, Status.STARTING, new HashSet<>(), new HashMap<>()));
 
     Assertions.assertEquals(1, crudRegistry.fetchAll().size());
   }
@@ -85,7 +98,7 @@ class CrudRegistryTest extends RedisTestConfiguration {
   void findOne_ResponseFound() {
     crudRegistry.insert(
         new RegisterServiceResponse(
-            "applicationName", 1, "test", 9090, new HashSet<>(), new HashMap<>()));
+            "applicationName", 1, "test", 9090, Status.STARTING, new HashSet<>(), new HashMap<>()));
 
     RegisterServiceResponse response =
         crudRegistry.findOne("applicationName", "test", 9090, 1).orElse(null);
@@ -100,7 +113,7 @@ class CrudRegistryTest extends RedisTestConfiguration {
   void remove_WithHostNameAndPort() {
     crudRegistry.insert(
         new RegisterServiceResponse(
-            "applicationName", 1, "test", 9090, new HashSet<>(), new HashMap<>()));
+            "applicationName", 1, "test", 9090, Status.STARTING, new HashSet<>(), new HashMap<>()));
 
     crudRegistry.remove("applicationName", "test", 1, 9090);
 
@@ -115,7 +128,7 @@ class CrudRegistryTest extends RedisTestConfiguration {
   void remove_WithResponse() {
     var registerServiceResponse =
         new RegisterServiceResponse(
-            "applicationName", 1, "url", 9090, new HashSet<>(), new HashMap<>());
+            "applicationName", 1, "url", 9090, Status.STARTING, new HashSet<>(), new HashMap<>());
 
     crudRegistry.remove(
         registerServiceResponse.applicationName(),

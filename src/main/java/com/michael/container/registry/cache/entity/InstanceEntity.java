@@ -15,7 +15,7 @@ public class InstanceEntity extends BaseInstance {
 
   // Composite key field (derived from applicationName + applicationVersion + url + port)
   @Id private String compositeKey;
-  private Status status;
+  private String status;
   private Set<String> dependsOn;
   private Map<Tag, String> metaData;
   @TimeToLive private Long timeToLive;
@@ -29,15 +29,18 @@ public class InstanceEntity extends BaseInstance {
   }
 
   public Status getStatus() {
-    return status;
+    if (status == null) {
+      return null;
+    }
+    return Status.valueOf(status);
   }
 
   public void setStatus(Status status) {
-    this.status = status;
+    this.status = status.name();
   }
 
   public void refreshTTL() {
-    timeToLive = 5L;
+    timeToLive = 20L;
   }
 
   public static String formCompositeKey(
