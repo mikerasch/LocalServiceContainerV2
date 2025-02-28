@@ -34,11 +34,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 
 @EnableWireMock({@ConfigureWireMock(name = "first-service")})
+@DirtiesContext // TODO CHANGE WHEN WE GET RID OF THE MAP IN REGISTERNOTIFICATIONSERVICE
 class SingleServiceTestSuite extends IntegrationTestExtension {
   @Autowired ObjectMapper objectMapper;
 

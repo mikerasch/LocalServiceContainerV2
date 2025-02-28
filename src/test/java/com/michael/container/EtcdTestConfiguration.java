@@ -10,7 +10,7 @@ public class EtcdTestConfiguration {
           .withExposedPorts(2379);
 
   @BeforeEach
-  void setUp() {
+  void setup() {
     etcdContainer.start();
     String etcdHost = etcdContainer.getHost();
     Integer etcdPort = etcdContainer.getMappedPort(2379);

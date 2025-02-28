@@ -19,7 +19,7 @@ public class IntegrationTestExtension {
     var etcdTestConfiguration = new EtcdTestConfiguration();
 
     RedisTestConfiguration.setup();
-    etcdTestConfiguration.setUp();
+    etcdTestConfiguration.setup();
   }
 
   @AfterEach
