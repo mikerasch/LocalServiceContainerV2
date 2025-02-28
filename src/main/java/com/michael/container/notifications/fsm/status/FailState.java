@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FailState implements StatusChange {
+public class FailState implements StatusChangeManager {
   private final ServiceRegistryService serviceRegistryService;
   private final NotificationService notificationService;
 

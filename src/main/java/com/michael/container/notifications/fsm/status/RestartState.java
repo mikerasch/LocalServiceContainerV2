@@ -6,7 +6,7 @@ import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RestartState implements StatusChange {
+public class RestartState implements StatusChangeManager {
   @Override
   public void triggerEvent(@Nonnull StatusChangeEvent statusChangeEvent) {
     // NO-OP currently, in the future, we might have something for RESTARTS.

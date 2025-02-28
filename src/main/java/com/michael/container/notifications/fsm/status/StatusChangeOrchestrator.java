@@ -4,8 +4,8 @@ import com.michael.container.registry.enums.Status;
 import com.michael.container.notifications.enums.StatusStateEvent;
 import com.michael.container.registry.model.StatusChangeEvent;
 import jakarta.annotation.Nonnull;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusChangeOrchestrator {
   private static final Logger log = LoggerFactory.getLogger(StatusChangeOrchestrator.class);
-  private final Map<StatusStateEvent, StatusChange> statusChangeMap;
+  private final Map<StatusStateEvent, StatusChangeManager> statusChangeMap;
 
-  public StatusChangeOrchestrator(List<StatusChange> statusChanges) {
+  public StatusChangeOrchestrator(Set<StatusChangeManager> statusChangeManagers) {
     this.statusChangeMap =
-        statusChanges.stream()
-            .collect(Collectors.toMap(StatusChange::getStatusStateEvent, Function.identity()));
+        statusChangeManagers.stream()
+            .collect(Collectors.toMap(StatusChangeManager::getStatusStateEvent, Function.identity()));
   }
 
   @EventListener(StatusChangeEvent.class)

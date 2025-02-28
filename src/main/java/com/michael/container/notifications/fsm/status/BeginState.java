@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BeginState implements StatusChange {
+public class BeginState implements StatusChangeManager {
   private final NotificationService notificationService;
 
   public BeginState(

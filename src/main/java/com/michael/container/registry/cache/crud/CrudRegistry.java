@@ -192,7 +192,6 @@ public class CrudRegistry {
       int port,
       @Nonnull Status status,
       boolean shouldFollowStateMachine) {
-    // TODO THROW BETTER
     InstanceEntity instanceEntity =
         findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
 
@@ -200,6 +199,7 @@ public class CrudRegistry {
 
     instanceEntity.setStatus(status);
 
+    // TODO probably need to not put this here.
     if (status == Status.UNDER_MAINTENANCE) {
       instanceEntity.setTimeToLive(ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
       log.info(
