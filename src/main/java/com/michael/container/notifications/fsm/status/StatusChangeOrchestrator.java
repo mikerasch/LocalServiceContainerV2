@@ -1,7 +1,7 @@
 package com.michael.container.notifications.fsm.status;
 
-import com.michael.container.registry.enums.Status;
 import com.michael.container.notifications.enums.StatusStateEvent;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.StatusChangeEvent;
 import jakarta.annotation.Nonnull;
 import java.util.Map;
@@ -21,7 +21,8 @@ public class StatusChangeOrchestrator {
   public StatusChangeOrchestrator(Set<StatusChangeManager> statusChangeManagers) {
     this.statusChangeMap =
         statusChangeManagers.stream()
-            .collect(Collectors.toMap(StatusChangeManager::getStatusStateEvent, Function.identity()));
+            .collect(
+                Collectors.toMap(StatusChangeManager::getStatusStateEvent, Function.identity()));
   }
 
   @EventListener(StatusChangeEvent.class)

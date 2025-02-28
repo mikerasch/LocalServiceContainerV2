@@ -13,7 +13,7 @@ public enum StatusStateEvent {
 ;
 
   public static Optional<StatusStateEvent> from(
-          @Nonnull Status previousStatus, @Nonnull Status newStatus) {
+      @Nonnull Status previousStatus, @Nonnull Status newStatus) {
     switch (newStatus) {
       case STARTING:
         if (previousStatus == Status.UNDER_MAINTENANCE) {
