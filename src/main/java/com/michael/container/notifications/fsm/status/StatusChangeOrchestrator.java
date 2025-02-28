@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class StatusChangeOrchestrator {
   private static final Logger log = LoggerFactory.getLogger(StatusChangeOrchestrator.class);
-  private final Map<StatusStateEvent, StatusChangeManager> statusChangeMap;
+  private final Map<StatusStateEvent, StatusChangeHandler> statusChangeMap;
 
-  public StatusChangeOrchestrator(Set<StatusChangeManager> statusChangeManagers) {
+  public StatusChangeOrchestrator(Set<StatusChangeHandler> statusChangeHandlers) {
     this.statusChangeMap =
-        statusChangeManagers.stream()
+        statusChangeHandlers.stream()
             .collect(
-                Collectors.toMap(StatusChangeManager::getStatusStateEvent, Function.identity()));
+                Collectors.toMap(StatusChangeHandler::getStatusStateEvent, Function.identity()));
   }
 
   @EventListener(StatusChangeEvent.class)

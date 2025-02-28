@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FixState implements StatusChangeManager {
+public class FixState implements StatusChangeHandler {
   private final NotificationService notificationService;
 
   public FixState(

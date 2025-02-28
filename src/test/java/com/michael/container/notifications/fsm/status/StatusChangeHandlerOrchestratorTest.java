@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
-class StatusChangeManagerOrchestratorTest {
+class StatusChangeHandlerOrchestratorTest {
   static StatusChangeOrchestrator orchestrator;
 
   static BeginState beginState;
@@ -28,13 +28,13 @@ class StatusChangeManagerOrchestratorTest {
     maintenanceState = Mockito.mock(MaintenanceState.class);
     restartState = Mockito.mock(RestartState.class);
 
-    Set<StatusChangeManager> statusChangeManagers =
+    Set<StatusChangeHandler> statusChangeHandlers =
         Set.of(beginState, failState, fixState, maintenanceState, restartState);
 
-    statusChangeManagers.forEach(
+    statusChangeHandlers.forEach(
         statusChange -> Mockito.doCallRealMethod().when(statusChange).getStatusStateEvent());
 
-    orchestrator = new StatusChangeOrchestrator(statusChangeManagers);
+    orchestrator = new StatusChangeOrchestrator(statusChangeHandlers);
   }
 
   @AfterEach
@@ -45,11 +45,11 @@ class StatusChangeManagerOrchestratorTest {
   @ParameterizedTest
   @MethodSource("statusChangeSource")
   void statusChange_CallsCorrectStateManager(
-      Status previousStatus, Status newStatus, StatusChangeManager statusChangeManager) {
+      Status previousStatus, Status newStatus, StatusChangeHandler statusChangeHandler) {
     orchestrator.onStatusChange(
         new StatusChangeEvent("applicationName", "URL", 1, 1, previousStatus, newStatus));
 
-    Mockito.verify(statusChangeManager).triggerEvent(Mockito.any());
+    Mockito.verify(statusChangeHandler).triggerEvent(Mockito.any());
   }
 
   public static Stream<Arguments> statusChangeSource() {
