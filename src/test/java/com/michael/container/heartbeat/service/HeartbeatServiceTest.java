@@ -6,6 +6,7 @@ import com.michael.container.heartbeat.enums.HeartbeatEvent;
 import com.michael.container.heartbeat.model.HeartbeatRequest;
 import com.michael.container.heartbeat.model.HeartbeatResponse;
 import com.michael.container.registry.cache.crud.CrudRegistry;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +42,13 @@ class HeartbeatServiceTest {
         .thenReturn(
             Optional.of(
                 new RegisterServiceResponse(
-                    "applicationName", 1, "test", 8080, new HashSet<>(), new HashMap<>())));
+                    "applicationName",
+                    1,
+                    "test",
+                    8080,
+                    Status.STARTING,
+                    new HashSet<>(),
+                    new HashMap<>())));
 
     HeartbeatResponse response =
         heartbeatService.heartbeat(new HeartbeatRequest("application-name", "test", 8080, 1));

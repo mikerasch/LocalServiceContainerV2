@@ -1,6 +1,6 @@
-package com.michael.container.registry.cache.listener;
+package com.michael.container.registry.cache.listener.key;
 
-import com.michael.container.registry.cache.enums.Key;
+import com.michael.container.registry.enums.Key;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.Set;

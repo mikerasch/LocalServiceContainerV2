@@ -1,4 +1,4 @@
-package com.michael.container.distributed.election.exception;
+package com.michael.container.exceptions;
 
 public class UncheckedURISyntaxException extends RuntimeException {
   public UncheckedURISyntaxException(Throwable e) {

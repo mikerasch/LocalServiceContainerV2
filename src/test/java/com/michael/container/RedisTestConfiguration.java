@@ -1,7 +1,7 @@
 package com.michael.container;
 
 import com.michael.container.config.RedisConfiguration;
-import com.michael.container.registry.cache.listener.KeyOrchestrator;
+import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;

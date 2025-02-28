@@ -3,6 +3,7 @@ package com.michael.container.registry.controller;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
+import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +29,7 @@ public class ServiceRegistryController {
   }
 
   @PostMapping
-  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseStatus(HttpStatus.CREATED)
   @Operation(
       summary =
           "Register a service. If the service already exists matching down "
@@ -50,5 +52,14 @@ public class ServiceRegistryController {
           "Deregister a service. Upon deregister, all dependent services will receive a DE_REGISTER event.")
   public void deregisterService(@RequestBody @Valid RemoveServiceRequest deregisterRequest) {
     registryService.removeService(deregisterRequest);
+  }
+
+  @PatchMapping
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(
+      summary =
+          "Updates the status of a service. All dependent services will become aware of this transition.")
+  public void updateStatusOnService(@RequestBody @Valid UpdateStatusRequest updateStatusRequest) {
+    registryService.updateStatusOnService(updateStatusRequest, true);
   }
 }

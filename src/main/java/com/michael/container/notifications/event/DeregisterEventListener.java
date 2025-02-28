@@ -15,7 +15,7 @@ public class DeregisterEventListener {
   private final NotificationService notificationService;
 
   public DeregisterEventListener(
-      @Qualifier("deregisterNotificationService") NotificationService notificationService) {
+      @Qualifier("generalNotificationService") NotificationService notificationService) {
     this.notificationService = notificationService;
   }
 

@@ -1,7 +1,7 @@
 package com.michael.container.health.repositories;
 
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
-import com.michael.container.registry.cache.enums.Key;
+import com.michael.container.registry.enums.Key;
 import jakarta.annotation.Nonnull;
 import java.util.Set;
 import org.springframework.data.redis.core.RedisTemplate;

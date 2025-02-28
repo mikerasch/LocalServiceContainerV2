@@ -1,6 +1,7 @@
 package com.michael.container.registry.service;
 
 import com.michael.container.registry.cache.crud.CrudRegistry;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.mapper.RegisterServiceRequestToRegisterServiceResponseMapper;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
@@ -49,7 +50,13 @@ class ServiceRegistryServiceTest {
   void fetchAll_Success() {
     var registerServiceResponse =
         new RegisterServiceResponse(
-            "applicationName", 1, "localhost", 8080, new HashSet<>(), new HashMap<>());
+            "applicationName",
+            1,
+            "localhost",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>());
     Mockito.when(crudRegistry.fetchAll())
         .thenReturn(Map.of("applicationName", Set.of(registerServiceResponse)));
 

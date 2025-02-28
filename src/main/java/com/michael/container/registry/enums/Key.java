@@ -1,4 +1,4 @@
-package com.michael.container.registry.cache.enums;
+package com.michael.container.registry.enums;
 
 import java.util.Arrays;
 import java.util.Optional;

@@ -20,6 +20,7 @@ public class HeartbeatService {
    * Processes a heartbeat request from a service and responds with the appropriate status.
    * If the application is NOT found in the registry, it responds with RE_REGISTER.
    * Otherwise, it refreshes the TTL of the service and returns FOUND.
+   * This will also transition the service from STARTING or DOWN -> HEALTHY
    *
    * @param heartbeatRequest a {@link HeartbeatRequest}
    * @return A {@link HeartbeatResponse} indicating whether the service needs to be re-registered or
@@ -40,7 +41,11 @@ public class HeartbeatService {
           HeartbeatEvent.RE_REGISTER, HeartbeatEvent.RE_REGISTER.getDescription());
     }
 
-    crudRegistry.insert(registerServiceResponse);
+    crudRegistry.updateTTL(
+        heartbeatRequest.applicationName(),
+        heartbeatRequest.url(),
+        heartbeatRequest.applicationVersion(),
+        heartbeatRequest.port());
 
     return new HeartbeatResponse(HeartbeatEvent.FOUND, HeartbeatEvent.FOUND.getDescription());
   }

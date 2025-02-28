@@ -1,6 +1,8 @@
 package com.michael.container.registry.cache.entity;
 
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.enums.Tag;
+import com.michael.container.utils.ContainerConstants;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +16,7 @@ public class InstanceEntity extends BaseInstance {
 
   // Composite key field (derived from applicationName + applicationVersion + url + port)
   @Id private String compositeKey;
+  private String status;
   private Set<String> dependsOn;
   private Map<Tag, String> metaData;
   @TimeToLive private Long timeToLive;
@@ -26,8 +29,19 @@ public class InstanceEntity extends BaseInstance {
     refreshTTL();
   }
 
+  public Status getStatus() {
+    if (status == null) {
+      return null;
+    }
+    return Status.valueOf(status);
+  }
+
+  public void setStatus(Status status) {
+    this.status = status.name();
+  }
+
   public void refreshTTL() {
-    timeToLive = 5L;
+    timeToLive = ContainerConstants.INSTANCE_ENTITY_DEFAULT_TIME_TO_LIVE;
   }
 
   public static String formCompositeKey(
@@ -57,5 +71,9 @@ public class InstanceEntity extends BaseInstance {
 
   public void setMetaData(Map<Tag, String> metaData) {
     this.metaData = metaData;
+  }
+
+  public void setTimeToLive(Long timeToLive) {
+    this.timeToLive = timeToLive;
   }
 }
