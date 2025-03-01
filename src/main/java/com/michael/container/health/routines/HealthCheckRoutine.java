@@ -10,12 +10,11 @@ import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.BaseInstance;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
+import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,11 +52,17 @@ public class HealthCheckRoutine {
     if (applicationEntities.isEmpty() || electionState.getRole() == Role.FOLLOWER) {
       return;
     }
+
     Set<HealthQueueEntity> healthQueueEntities =
         applicationEntities.stream()
             .map(HealthCheckRoutine::getHealthQueueEntity)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
+
+    if (CollectionUtils.isEmpty(healthQueueEntities)) {
+      return;
+    }
+
     log.info("Queuing {} application entities for health check.", healthQueueEntities.size());
 
     healthQueueRepository.enqueue(healthQueueEntities);
