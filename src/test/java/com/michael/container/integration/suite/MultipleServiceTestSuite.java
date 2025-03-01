@@ -4,6 +4,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.michael.container.IntegrationTestExtension;
+import com.michael.container.distributed.election.enums.Role;
+import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RemoveServiceRequest;
@@ -35,6 +37,8 @@ class MultipleServiceTestSuite extends IntegrationTestExtension {
   @InjectWireMock("second-service")
   WireMockServer secondService;
 
+  @Autowired ElectionState electionState;
+
   String firstWireMockUrl;
   int firstWireMockPort;
 
@@ -43,6 +47,7 @@ class MultipleServiceTestSuite extends IntegrationTestExtension {
 
   @BeforeEach
   void setup() {
+    electionState.setRole(Role.LEADER);
     firstWireMockPort = firstService.port();
     firstWireMockUrl = firstService.baseUrl().replace(":" + firstWireMockPort, "");
     secondWireMockPort = secondService.port();

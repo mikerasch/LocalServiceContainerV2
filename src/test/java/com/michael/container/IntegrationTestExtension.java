@@ -1,5 +1,6 @@
 package com.michael.container;
 
+import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class IntegrationTestExtension {
   }
 
   @AfterEach
-  public void afterEach() {
-    redisTestConfiguration.tearDown(redisTemplate);
+  public void afterEach() throws IOException, InterruptedException {
+    redisTestConfiguration.tearDown();
   }
 }
