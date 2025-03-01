@@ -1,6 +1,8 @@
 package com.michael.container.notifications.service;
 
 import com.michael.container.RedisTestConfiguration;
+import com.michael.container.distributed.election.enums.Role;
+import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotificationType;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
@@ -25,7 +27,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -42,6 +46,16 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
   @Mock ApplicationEventPublisher publisher;
   @Autowired ApplicationRepository applicationRepository;
   @Autowired InstanceRepository instanceRepository;
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    public ElectionState electionState() {
+      var electionState = new ElectionState();
+      electionState.setRole(Role.LEADER);
+      return electionState;
+    }
+  }
 
   @BeforeEach
   void beforeEach() {

@@ -2,8 +2,7 @@ package com.michael.container.registry.cache.listener.key;
 
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
-import com.michael.container.registry.cache.enums.Key;
-import jakarta.annotation.Nonnull;
+import com.michael.container.registry.enums.Key;
 import java.util.Set;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
