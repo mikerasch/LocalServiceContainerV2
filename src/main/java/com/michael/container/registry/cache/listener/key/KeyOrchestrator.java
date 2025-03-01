@@ -38,13 +38,7 @@ public class KeyOrchestrator implements MessageListener {
 
     keyListeners.stream()
         .filter(listener -> listener.supports(key))
-        .forEach(keyListener -> sendMessage(message, pattern, keyListener, currentRole));
-  }
-
-  private static void sendMessage(
-      Message message, byte[] pattern, KeyListener keyListener, Role role) {
-    if (keyListener.accessLevel().canSend(role)) {
-      keyListener.onMessage(message, pattern);
-    }
+        .filter(keyListener -> keyListener.accessLevel().canSend(currentRole))
+        .forEach(keyListener -> onMessage(message, pattern));
   }
 }
