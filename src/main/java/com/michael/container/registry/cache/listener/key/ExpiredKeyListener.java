@@ -1,5 +1,6 @@
 package com.michael.container.registry.cache.listener.key;
 
+import com.michael.container.distributed.election.enums.MethodAccess;
 import com.michael.container.registry.enums.Key;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
@@ -50,5 +51,10 @@ public class ExpiredKeyListener implements KeyListener {
   @Override
   public boolean supports(Key key) {
     return SUPPORTED_KEYS.contains(key);
+  }
+
+  @Override
+  public MethodAccess accessLevel() {
+    return MethodAccess.LEADER_ONLY;
   }
 }

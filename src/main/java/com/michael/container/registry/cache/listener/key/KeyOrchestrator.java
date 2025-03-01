@@ -1,5 +1,7 @@
 package com.michael.container.registry.cache.listener.key;
 
+import com.michael.container.distributed.election.enums.Role;
+import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.registry.enums.Key;
 import java.util.Set;
 import org.springframework.data.redis.connection.Message;
@@ -14,9 +16,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class KeyOrchestrator implements MessageListener {
   private final Set<KeyListener> keyListeners;
+  private final ElectionState electionState;
 
-  public KeyOrchestrator(Set<KeyListener> keyListenerList) {
+  public KeyOrchestrator(Set<KeyListener> keyListenerList, ElectionState electionState) {
     this.keyListeners = keyListenerList;
+    this.electionState = electionState;
   }
 
   @Override
@@ -30,8 +34,11 @@ public class KeyOrchestrator implements MessageListener {
       return;
     }
 
+    Role currentRole = electionState.getRole();
+
     keyListeners.stream()
         .filter(listener -> listener.supports(key))
+        .filter(keyListener -> keyListener.accessLevel().canSend(currentRole))
         .forEach(keyListener -> keyListener.onMessage(message, pattern));
   }
 }

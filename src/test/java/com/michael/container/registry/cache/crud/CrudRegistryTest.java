@@ -1,6 +1,8 @@
 package com.michael.container.registry.cache.crud;
 
 import com.michael.container.RedisTestConfiguration;
+import com.michael.container.distributed.election.enums.Role;
+import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
 import com.michael.container.registry.enums.Status;
@@ -19,7 +21,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +32,16 @@ class CrudRegistryTest extends RedisTestConfiguration {
   @Mock ApplicationEventPublisher eventPublisher;
   @Autowired ApplicationRepository applicationRepository;
   @Autowired InstanceRepository instanceRepository;
+
+  @TestConfiguration
+  static class TestConfig {
+    @Bean
+    public ElectionState electionState() {
+      var electionState = new ElectionState();
+      electionState.setRole(Role.LEADER);
+      return electionState;
+    }
+  }
 
   @BeforeEach
   void beforeEach() {

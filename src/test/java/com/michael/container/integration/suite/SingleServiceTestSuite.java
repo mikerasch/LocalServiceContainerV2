@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.michael.container.IntegrationTestExtension;
+import com.michael.container.distributed.election.enums.Role;
+import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.health.routines.HealthCheckRoutine;
 import com.michael.container.health.service.HealthCheckService;
 import com.michael.container.registry.enums.Status;
@@ -50,6 +52,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
   @Autowired ServiceRegistryService serviceRegistryService;
 
   @Autowired HealthCheckService healthCheckService;
+  @Autowired ElectionState electionState;
 
   @Autowired
   @Qualifier("healthCheckExecutorService")
@@ -67,6 +70,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
 
   @BeforeEach
   public void setUp() {
+    electionState.setRole(Role.LEADER);
     headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
