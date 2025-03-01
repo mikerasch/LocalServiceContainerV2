@@ -11,8 +11,12 @@ import com.michael.container.registry.cache.entity.BaseInstance;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import jakarta.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,23 +53,27 @@ public class HealthCheckRoutine {
     if (applicationEntities.isEmpty() || electionState.getRole() == Role.FOLLOWER) {
       return;
     }
-    // TODO NEED TO ENSURE WE ARE NOT ALLOWING A HEALTH QUEUE ENTITY WITH AN EMPTY BASE INSTANCE IN.
     Set<HealthQueueEntity> healthQueueEntities =
         applicationEntities.stream()
-            .map(
-                applicationEntity -> {
-                  HealthQueueEntity healthQueueEntity = new HealthQueueEntity();
-                  healthQueueEntity.setBaseInstanceList(
-                      applicationEntity.getInstanceEntities().stream()
-                          .filter(
-                              entity -> !STATUSES_TO_SKIP_HEARTBEAT.contains(entity.getStatus()))
-                          .map(BaseInstance.class::cast)
-                          .collect(Collectors.toSet()));
-                  return healthQueueEntity;
-                })
+            .map(HealthCheckRoutine::getHealthQueueEntity)
+            .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     log.info("Queuing {} application entities for health check.", healthQueueEntities.size());
 
     healthQueueRepository.enqueue(healthQueueEntities);
+  }
+
+  @Nullable
+  private static HealthQueueEntity getHealthQueueEntity(ApplicationEntity applicationEntity) {
+    HealthQueueEntity healthQueueEntity = new HealthQueueEntity();
+    healthQueueEntity.setBaseInstanceList(
+        applicationEntity.getInstanceEntities().stream()
+            .filter(entity -> !STATUSES_TO_SKIP_HEARTBEAT.contains(entity.getStatus()))
+            .map(BaseInstance.class::cast)
+            .collect(Collectors.toSet()));
+    if (CollectionUtils.isEmpty(healthQueueEntity.getBaseInstanceList())) {
+      return null;
+    }
+    return healthQueueEntity;
   }
 }
