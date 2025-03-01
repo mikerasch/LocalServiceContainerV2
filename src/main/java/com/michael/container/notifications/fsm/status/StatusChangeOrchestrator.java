@@ -1,6 +1,7 @@
 package com.michael.container.notifications.fsm.status;
 
 import com.michael.container.notifications.enums.StatusStateEvent;
+import com.michael.container.registry.cache.entity.InstanceEntity;
 import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.StatusChangeEvent;
 import jakarta.annotation.Nonnull;
@@ -43,8 +44,19 @@ public class StatusChangeOrchestrator {
           "A status change event has occurred. However, a valid state transition could not be identified. Received: previous {}, new {} status",
           previousStatus,
           newStatus);
+      return;
     }
-
+    String instanceKey =
+        InstanceEntity.formCompositeKey(
+            statusChangeEvent.applicationName(),
+            statusChangeEvent.applicationVersion(),
+            statusChangeEvent.url(),
+            statusChangeEvent.port());
+    log.info(
+        "Status change detected: Transitioning from '{}' to '{}' for entity '{}'.",
+        previousStatus,
+        newStatus,
+        instanceKey);
     triggerEvent(event, statusChangeEvent);
   }
 

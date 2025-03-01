@@ -1,8 +1,9 @@
 package com.michael.container.config;
 
+import static com.michael.container.utils.ContainerConstants.HEALTH_QUEUE_PATTERN_NAME;
+
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
-import com.michael.container.registry.enums.Key;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,8 +43,7 @@ public class RedisConfiguration {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
     container.setConnectionFactory(redisConnectionFactory);
     container.addMessageListener(keyOrchestrator, new ChannelTopic("__keyevent@0__:expired"));
-    container.addMessageListener(
-        keyOrchestrator, new PatternTopic(Key.HEALTH_QUEUE_ENTITY.getName()));
+    container.addMessageListener(keyOrchestrator, new PatternTopic(HEALTH_QUEUE_PATTERN_NAME));
     return container;
   }
 }

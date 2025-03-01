@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExpiredKeyListener implements KeyListener {
-  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.INSTANCE_ENTITY);
+  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.EXPIRED_INSTANCE_ENTITY);
   private static final Pattern pattern =
       Pattern.compile(
           "^instanceEntity:([a-zA-Z0-9-]+-v\\d+):(\\d+):(http[s]?://[^:/]+)(?::(\\d+))?$");

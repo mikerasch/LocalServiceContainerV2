@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class HealthQueueListener implements KeyListener {
-  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.HEALTH_QUEUE_ENTITY);
+  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.ADDED_HEALTH_QUEUE_ENTITY);
   private final HealthCheckService healthCheckService;
 
   public HealthQueueListener(HealthCheckService healthCheckService) {

@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -153,8 +155,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DownStatus()
-      throws InterruptedException {
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DownStatus() throws ExecutionException, InterruptedException {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
             "first-service", 1, wireMockUrl, wireMockPort, new HashSet<>(), new HashMap<>());
@@ -167,12 +168,15 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
     healthCheckRoutine.populateHealthCheckQueue();
     healthCheckService.performCheck();
 
-    executorService.awaitTermination(5, TimeUnit.SECONDS);
 
-    Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
+    Thread.sleep(3000);
+
+    var map = serviceRegistryService.fetchAll();
+
+    Assertions.assertEquals(1, map.size());
     Assertions.assertTrue(
-        serviceRegistryService.fetchAll().get("first-service").stream()
-            .anyMatch(x -> x.status() == Status.DOWN));
+            map.get("first-service").stream()
+                    .anyMatch(x -> x.status() == Status.DOWN));
   }
 
   @Test
@@ -192,11 +196,12 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
 
     healthCheckService.performCheck();
 
-    executorService.awaitTermination(5, TimeUnit.SECONDS);
+    Thread.sleep(3000);
 
-    Assertions.assertEquals(1, serviceRegistryService.fetchAll().size());
-    Assertions.assertTrue(
-        serviceRegistryService.fetchAll().get("first-service").stream()
+    var map = serviceRegistryService.fetchAll();
+
+    Assertions.assertEquals(1, map.size());
+    Assertions.assertTrue(map.get("first-service").stream()
             .anyMatch(x -> x.status() == Status.DOWN));
   }
 
