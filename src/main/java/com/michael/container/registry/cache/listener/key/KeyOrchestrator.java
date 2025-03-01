@@ -39,6 +39,6 @@ public class KeyOrchestrator implements MessageListener {
     keyListeners.stream()
         .filter(listener -> listener.supports(key))
         .filter(keyListener -> keyListener.accessLevel().canSend(currentRole))
-        .forEach(keyListener -> onMessage(message, pattern));
+        .forEach(keyListener -> keyListener.onMessage(message, pattern));
   }
 }
