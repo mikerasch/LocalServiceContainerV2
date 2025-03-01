@@ -1,6 +1,6 @@
-package com.michael.container.registry.cache.listener;
+package com.michael.container.registry.cache.listener.key;
 
-import com.michael.container.registry.cache.enums.Key;
+import com.michael.container.registry.enums.Key;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.Set;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExpiredKeyListener implements KeyListener {
-  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.INSTANCE_ENTITY);
+  private static final Set<Key> SUPPORTED_KEYS = Set.of(Key.EXPIRED_INSTANCE_ENTITY);
   private static final Pattern pattern =
       Pattern.compile(
           "^instanceEntity:([a-zA-Z0-9-]+-v\\d+):(\\d+):(http[s]?://[^:/]+)(?::(\\d+))?$");

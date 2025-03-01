@@ -1,12 +1,15 @@
 package com.michael.container.registry.cache.crud;
 
+import com.michael.container.exceptions.ResourceNotFoundException;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.InstanceEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.DeregisterEvent;
-import com.michael.container.registry.model.RegisterEvent;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.container.registry.model.StatusChangeEvent;
+import com.michael.container.utils.ContainerConstants;
 import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +18,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -22,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 @Component
 public class CrudRegistry {
+  private static final Logger log = LoggerFactory.getLogger(CrudRegistry.class);
   private final ApplicationEventPublisher eventPublisher;
   private final ApplicationRepository applicationRepository;
   private final InstanceRepository instanceRepository;
@@ -42,8 +48,8 @@ public class CrudRegistry {
    * Inserts a new instance into the application repository or updates an existing one based on the provided
    * {@link RegisterServiceResponse}. If the application does not already exist, a new application entity is created.
    * After the instance is saved, it is added to the application entity, and the application is saved or updated.
-   * Additionally, an event of type {@link RegisterEvent} is published with the details from the
-   * {@link RegisterServiceResponse}, including the application name, URL, version, and port.
+   * Additionally, an event of type {@link StatusChangeEvent} is published with the details from the
+   * {@link RegisterServiceResponse}, including the application name, URL, version, before and after status change, and port.
    */
   public void insert(@Nonnull RegisterServiceResponse registerServiceResponse) {
     var applicationEntity =
@@ -54,8 +60,14 @@ public class CrudRegistry {
     }
 
     var instanceEntity = conversionService.convert(registerServiceResponse, InstanceEntity.class);
+    Status previousStatus = Objects.requireNonNull(instanceEntity).getStatus();
+    if (previousStatus == null) {
+      // The initial status is ALWAYS starting.
+      // It will transition to the next status upon first successful heartbeat.
+      instanceEntity.setStatus(Status.STARTING);
+    }
 
-    instanceRepository.save(Objects.requireNonNull(instanceEntity));
+    instanceRepository.save(instanceEntity);
 
     applicationEntity.setApplicationName(registerServiceResponse.applicationName());
     applicationEntity.addAllInstanceEntities(instanceEntity);
@@ -63,11 +75,13 @@ public class CrudRegistry {
     applicationRepository.save(applicationEntity);
 
     eventPublisher.publishEvent(
-        new RegisterEvent(
+        new StatusChangeEvent(
             registerServiceResponse.applicationName(),
             registerServiceResponse.url(),
             registerServiceResponse.applicationVersion(),
-            registerServiceResponse.port()));
+            registerServiceResponse.port(),
+            previousStatus,
+            instanceEntity.getStatus()));
   }
 
   /**
@@ -145,5 +159,85 @@ public class CrudRegistry {
 
     eventPublisher.publishEvent(
         new DeregisterEvent(applicationName, url, applicationVersion, port));
+  }
+
+  public void updateTTL(
+      @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
+    InstanceEntity instanceEntity =
+        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
+
+    instanceEntity.refreshTTL();
+
+    if (Status.HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS.contains(instanceEntity.getStatus())) {
+      Status previousStatus = instanceEntity.getStatus();
+      instanceEntity.setStatus(Status.HEALTHY);
+      eventPublisher.publishEvent(
+          new StatusChangeEvent(
+              applicationName, url, applicationVersion, port, previousStatus, Status.HEALTHY));
+      log.debug(
+          "Instance for application '{}', version '{}', url '{}', port '{}' transitioning from {} to HEALTHY.",
+          applicationName,
+          applicationVersion,
+          url,
+          port,
+          previousStatus);
+    }
+    instanceRepository.save(instanceEntity);
+  }
+
+  public void updateStatusOnService(
+      @Nonnull String applicationName,
+      @Nonnull String url,
+      int applicationVersion,
+      int port,
+      @Nonnull Status status,
+      boolean shouldFollowStateMachine) {
+    InstanceEntity instanceEntity =
+        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
+
+    Status previousStatus = instanceEntity.getStatus();
+
+    instanceEntity.setStatus(status);
+
+    // TODO probably need to not put this here.
+    if (status == Status.UNDER_MAINTENANCE) {
+      instanceEntity.setTimeToLive(ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
+      log.info(
+          "Service '{}' version {} at {}:{} is transitioning to maintenance mode. TTL extended to 90 minutes ({} milli-seconds).",
+          applicationName,
+          applicationVersion,
+          url,
+          port,
+          ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
+    }
+
+    log.debug(
+        "Updating status of instance with applicationName: {}, version: {}, url: {}, port: {} to status: {}",
+        applicationName,
+        applicationVersion,
+        url,
+        port,
+        status);
+
+    instanceRepository.save(instanceEntity);
+
+    if (shouldFollowStateMachine) {
+      eventPublisher.publishEvent(
+          new StatusChangeEvent(
+              applicationName, url, applicationVersion, port, previousStatus, status));
+    }
+  }
+
+  private InstanceEntity findInstanceEntityOrElseThrow(
+      String applicationName, String url, int applicationVersion, int port) {
+    String instanceEntityCompositeKey =
+        InstanceEntity.formCompositeKey(applicationName, applicationVersion, url, port);
+    return instanceRepository
+        .findById(instanceEntityCompositeKey)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Instance not found with composite key %s"
+                        .formatted(instanceEntityCompositeKey)));
   }
 }

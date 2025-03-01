@@ -49,7 +49,7 @@ class ServiceRegistryControllerTest {
                             8080,
                             new HashSet<>(),
                             new HashMap<>()))))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isCreated());
 
     Mockito.verify(registryService).registerService(Mockito.any());
   }

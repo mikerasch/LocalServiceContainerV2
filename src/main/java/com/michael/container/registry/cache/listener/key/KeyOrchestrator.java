@@ -1,6 +1,6 @@
-package com.michael.container.registry.cache.listener;
+package com.michael.container.registry.cache.listener.key;
 
-import com.michael.container.registry.cache.enums.Key;
+import com.michael.container.registry.enums.Key;
 import java.util.Set;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -21,9 +21,10 @@ public class KeyOrchestrator implements MessageListener {
 
   @Override
   public void onMessage(Message message, byte[] pattern) {
-    String keyTable = new String(pattern).split(":")[0];
-
-    Key key = Key.from(keyTable).orElse(null);
+    String channel = new String(message.getChannel());
+    String body = new String(message.getBody());
+    // TODO this might have to be revisited in the future
+    Key key = Key.from(channel.split(":")[1], body.split(":")[0]).orElse(null);
 
     if (key == null) {
       return;

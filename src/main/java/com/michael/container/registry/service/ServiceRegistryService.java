@@ -4,6 +4,8 @@ import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
+import com.michael.container.registry.model.UpdateStatusRequest;
+import jakarta.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +24,7 @@ public class ServiceRegistryService {
     this.crudRegistry = crudRegistry;
   }
 
-  public void registerService(RegisterServiceRequest registerServiceRequest) {
+  public void registerService(@Nonnull RegisterServiceRequest registerServiceRequest) {
     crudRegistry.insert(
         Objects.requireNonNull(
             conversionService.convert(registerServiceRequest, RegisterServiceResponse.class)));
@@ -36,11 +38,22 @@ public class ServiceRegistryService {
     return map;
   }
 
-  public void removeService(RemoveServiceRequest removeServiceRequest) {
+  public void removeService(@Nonnull RemoveServiceRequest removeServiceRequest) {
     crudRegistry.remove(
         removeServiceRequest.applicationName(),
         removeServiceRequest.url(),
         removeServiceRequest.version(),
         removeServiceRequest.port());
+  }
+
+  public void updateStatusOnService(
+      @Nonnull UpdateStatusRequest updateStatusRequest, boolean shouldFollowStateMachine) {
+    crudRegistry.updateStatusOnService(
+        updateStatusRequest.applicationName(),
+        updateStatusRequest.url(),
+        updateStatusRequest.applicationVersion(),
+        updateStatusRequest.port(),
+        updateStatusRequest.status(),
+        shouldFollowStateMachine);
   }
 }
