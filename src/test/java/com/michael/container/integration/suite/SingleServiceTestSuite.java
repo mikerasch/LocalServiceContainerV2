@@ -17,12 +17,11 @@ import com.michael.container.registry.service.ServiceRegistryService;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -155,7 +154,7 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
   }
 
   @Test
-  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DownStatus() throws ExecutionException, InterruptedException {
+  void registerService_SuccessfulRegistration_HealthCheckFailsDueToConnectTimeout_DownStatus() {
     RegisterServiceRequest registerServiceRequest =
         new RegisterServiceRequest(
             "first-service", 1, wireMockUrl, wireMockPort, new HashSet<>(), new HashMap<>());
@@ -166,17 +165,21 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
     serviceRegistryService.registerService(registerServiceRequest);
 
     healthCheckRoutine.populateHealthCheckQueue();
-    healthCheckService.performCheck();
-
-
-    Thread.sleep(3000);
+    List<Future<?>> futures = healthCheckService.performCheck();
+    futures.forEach(
+        x -> {
+          try {
+            x.get();
+          } catch (Exception e) {
+            Assertions.fail(e);
+          }
+        });
 
     var map = serviceRegistryService.fetchAll();
 
     Assertions.assertEquals(1, map.size());
     Assertions.assertTrue(
-            map.get("first-service").stream()
-                    .anyMatch(x -> x.status() == Status.DOWN));
+        map.get("first-service").stream().anyMatch(x -> x.status() == Status.DOWN));
   }
 
   @Test
@@ -193,16 +196,21 @@ class SingleServiceTestSuite extends IntegrationTestExtension {
         new UpdateStatusRequest("first-service", 1, wireMockUrl, wireMockPort, Status.HEALTHY),
         true);
     healthCheckRoutine.populateHealthCheckQueue();
-
-    healthCheckService.performCheck();
-
-    Thread.sleep(3000);
+    List<Future<?>> futures = healthCheckService.performCheck();
+    futures.forEach(
+        x -> {
+          try {
+            x.get();
+          } catch (Exception e) {
+            Assertions.fail(e);
+          }
+        });
 
     var map = serviceRegistryService.fetchAll();
 
     Assertions.assertEquals(1, map.size());
-    Assertions.assertTrue(map.get("first-service").stream()
-            .anyMatch(x -> x.status() == Status.DOWN));
+    Assertions.assertTrue(
+        map.get("first-service").stream().anyMatch(x -> x.status() == Status.DOWN));
   }
 
   @Test

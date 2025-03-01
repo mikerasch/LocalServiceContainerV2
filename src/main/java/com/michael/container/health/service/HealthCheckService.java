@@ -6,7 +6,10 @@ import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.StatusChangeEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,14 +41,16 @@ public class HealthCheckService {
    * The method runs in a loop until there are no more health check entities in the queue (i.e., the
    * dequeued entity is null)
    */
-  public void performCheck() {
+  public List<Future<?>> performCheck() {
+    List<Future<?>> futures = new ArrayList<>();
     HealthQueueEntity healthQueueEntity;
     do {
       healthQueueEntity = healthQueueRepository.dequeue();
       HealthQueueEntity finalHealthQueueEntity = healthQueueEntity;
-      healthCheckExecutorService.submit(() -> sendRequest(finalHealthQueueEntity));
+      futures.add(healthCheckExecutorService.submit(() -> sendRequest(finalHealthQueueEntity)));
 
     } while (healthQueueEntity != null);
+    return futures;
   }
 
   private void sendRequest(HealthQueueEntity healthQueueEntity) {
