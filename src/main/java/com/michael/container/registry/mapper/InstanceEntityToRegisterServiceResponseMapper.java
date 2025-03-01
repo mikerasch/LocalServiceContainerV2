@@ -17,6 +17,7 @@ public class InstanceEntityToRegisterServiceResponseMapper
         source.getApplicationVersion(),
         source.getUrl(),
         source.getPort(),
+        source.getStatus(),
         source.getDependsOn(),
         source.getMetaData());
   }

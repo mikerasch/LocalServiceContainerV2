@@ -6,8 +6,8 @@ import com.michael.container.registry.cache.crud.CrudRegistry;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DeregisterNotificationService extends NotificationService {
-  protected DeregisterNotificationService(
+public class GeneralNotificationService extends NotificationService {
+  protected GeneralNotificationService(
       NotificationClient notificationClient, CrudRegistry crudRegistry) {
     super(notificationClient, crudRegistry);
   }

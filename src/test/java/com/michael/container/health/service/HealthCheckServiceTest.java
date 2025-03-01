@@ -7,7 +7,7 @@ import com.michael.container.health.exception.HealthCheckInvalidException;
 import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.BaseInstance;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
-import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.container.registry.model.StatusChangeEvent;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -17,14 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class HealthCheckServiceTest {
   HealthCheckService routine;
 
-  @Mock ServiceRegistryService registryService;
-
   @Mock HealthCheckClient healthCheckClient;
+  @Mock ApplicationEventPublisher eventPublisher;
   @Mock HealthQueueRepository healthQueueRepository;
   @Mock ExecutorService executorService;
 
@@ -32,7 +32,7 @@ class HealthCheckServiceTest {
   void setup() {
     routine =
         new HealthCheckService(
-            registryService, healthCheckClient, healthQueueRepository, executorService);
+            healthCheckClient, healthQueueRepository, executorService, eventPublisher);
   }
 
   @Test
@@ -45,7 +45,7 @@ class HealthCheckServiceTest {
     Mockito.doThrow(new HealthCheckInvalidException("sad"))
         .when(healthCheckClient)
         .checkHealth("test:8080/health");
-    Mockito.doNothing().when(registryService).removeService(any());
+    Mockito.doNothing().when(eventPublisher).publishEvent(any(StatusChangeEvent.class));
 
     CountDownLatch latch = new CountDownLatch(1);
 
@@ -62,7 +62,7 @@ class HealthCheckServiceTest {
 
     latch.await();
 
-    Mockito.verify(registryService).removeService(any());
+    Mockito.verify(eventPublisher).publishEvent(any(StatusChangeEvent.class));
     Mockito.verify(healthCheckClient).checkHealth(any());
   }
 
@@ -90,7 +90,7 @@ class HealthCheckServiceTest {
 
     latch.await();
 
-    Mockito.verify(registryService, Mockito.times(0)).removeService(any());
+    Mockito.verify(eventPublisher, Mockito.times(0)).publishEvent(any());
     Mockito.verify(healthCheckClient).checkHealth(any());
   }
 }

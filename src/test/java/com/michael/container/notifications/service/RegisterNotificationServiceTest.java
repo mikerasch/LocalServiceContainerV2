@@ -7,6 +7,7 @@ import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
+import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.mapper.InstanceEntityToRegisterServiceResponseMapper;
 import com.michael.container.registry.mapper.RegisterServiceResponseToInstanceEntityMapper;
 import com.michael.container.registry.model.RegisterServiceResponse;
@@ -61,13 +62,20 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
     Set<RegisterServiceResponse> set = new HashSet<>();
     set.add(
         new RegisterServiceResponse(
-            "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()));
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
             "someOtherApplication",
             2,
             "10.10.10.11",
             8080,
+            Status.STARTING,
             Set.of("applicationName"),
             new HashMap<>()));
 
@@ -88,13 +96,20 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
     Set<RegisterServiceResponse> set = new HashSet<>();
     set.add(
         new RegisterServiceResponse(
-            "applicationName", 1, "10.10.10.10", 8080, new HashSet<>(), new HashMap<>()));
+            "applicationName",
+            1,
+            "10.10.10.10",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
             "someOtherApplication",
             2,
             "10.10.10.11",
             8080,
+            Status.STARTING,
             Set.of("applicationName"),
             new HashMap<>()));
     set.add(
@@ -103,6 +118,7 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             2,
             "10.10.10.12",
             8080,
+            Status.STARTING,
             Set.of("applicationName"),
             new HashMap<>()));
 
@@ -126,11 +142,18 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             1,
             "10.10.10.10",
             8080,
+            Status.STARTING,
             Set.of("someOtherApplication"),
             new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
-            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
 
     set.forEach(response -> crudRegistry.insert(response));
 
@@ -153,14 +176,27 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             1,
             "10.10.10.10",
             8080,
+            Status.STARTING,
             Set.of("someOtherApplication", "someOtherOtherApplication"),
             new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
-            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
-            "someOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherApplication",
+            2,
+            "10.10.10.12",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
 
     set.forEach(response -> crudRegistry.insert(response));
 
@@ -183,11 +219,18 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             1,
             "10.10.10.10",
             8080,
+            Status.STARTING,
             Set.of("someOtherApplication", "someOtherOtherApplication"),
             new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
-            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
 
     set.forEach(response -> crudRegistry.insert(response));
 
@@ -216,11 +259,18 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             1,
             "10.10.10.10",
             8080,
+            Status.STARTING,
             Set.of("someOtherApplication", "someOtherOtherApplication"),
             new HashMap<>()));
     set.add(
         new RegisterServiceResponse(
-            "someOtherApplication", 2, "10.10.10.11", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherApplication",
+            2,
+            "10.10.10.11",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
 
     set.forEach(response -> crudRegistry.insert(response));
 
@@ -228,7 +278,13 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
 
     set.add(
         new RegisterServiceResponse(
-            "someOtherOtherApplication", 2, "10.10.10.12", 8080, new HashSet<>(), new HashMap<>()));
+            "someOtherOtherApplication",
+            2,
+            "10.10.10.12",
+            8080,
+            Status.STARTING,
+            new HashSet<>(),
+            new HashMap<>()));
     set.forEach(response -> crudRegistry.insert(response));
 
     service.processPendingNotifications();

@@ -4,32 +4,36 @@ import com.michael.container.health.client.HealthCheckClient;
 import com.michael.container.health.exception.HealthCheckInvalidException;
 import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
-import com.michael.container.registry.model.RemoveServiceRequest;
-import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.container.registry.enums.Status;
+import com.michael.container.registry.model.StatusChangeEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
 public class HealthCheckService {
   private static final String HEALTH_CHECK_URL = "%s:%s/health";
   private static final Logger logger = LoggerFactory.getLogger(HealthCheckService.class);
-  private final ServiceRegistryService registryService;
   private final HealthCheckClient healthCheckClient;
   private final HealthQueueRepository healthQueueRepository;
   private final ExecutorService healthCheckExecutorService;
+  private final ApplicationEventPublisher eventPublisher;
 
   public HealthCheckService(
-      ServiceRegistryService registryService,
       HealthCheckClient healthCheckClient,
       HealthQueueRepository healthQueueRepository,
-      @Qualifier("healthCheckExecutorService") ExecutorService healthCheckExecutorService) {
-    this.registryService = registryService;
+      @Qualifier("healthCheckExecutorService") ExecutorService healthCheckExecutorService,
+      ApplicationEventPublisher eventPublisher) {
     this.healthCheckClient = healthCheckClient;
     this.healthQueueRepository = healthQueueRepository;
     this.healthCheckExecutorService = healthCheckExecutorService;
+    this.eventPublisher = eventPublisher;
   }
 
   /**
@@ -37,14 +41,16 @@ public class HealthCheckService {
    * The method runs in a loop until there are no more health check entities in the queue (i.e., the
    * dequeued entity is null)
    */
-  public void performCheck() {
+  public List<Future<?>> performCheck() {
+    List<Future<?>> futures = new ArrayList<>();
     HealthQueueEntity healthQueueEntity;
     do {
       healthQueueEntity = healthQueueRepository.dequeue();
       HealthQueueEntity finalHealthQueueEntity = healthQueueEntity;
-      healthCheckExecutorService.submit(() -> sendRequest(finalHealthQueueEntity));
+      futures.add(healthCheckExecutorService.submit(() -> sendRequest(finalHealthQueueEntity)));
 
     } while (healthQueueEntity != null);
+    return futures;
   }
 
   private void sendRequest(HealthQueueEntity healthQueueEntity) {
@@ -64,12 +70,14 @@ public class HealthCheckService {
                     "Health check failed for service '{}'. Error: {}",
                     healthCheckUrl,
                     healthCheckInvalidException.getMessage());
-                registryService.removeService(
-                    new RemoveServiceRequest(
+                eventPublisher.publishEvent(
+                    new StatusChangeEvent(
                         serviceResponse.getApplicationName(),
                         serviceResponse.getUrl(),
                         serviceResponse.getApplicationVersion(),
-                        serviceResponse.getPort()));
+                        serviceResponse.getPort(),
+                        Status.HEALTHY,
+                        Status.DOWN));
               }
             });
   }

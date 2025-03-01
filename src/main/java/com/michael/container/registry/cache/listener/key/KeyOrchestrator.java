@@ -1,4 +1,4 @@
-package com.michael.container.registry.cache.listener;
+package com.michael.container.registry.cache.listener.key;
 
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
@@ -25,10 +25,11 @@ public class KeyOrchestrator implements MessageListener {
   }
 
   @Override
-  public void onMessage(@Nonnull Message message, byte[] pattern) {
-    String keyTable = new String(pattern).split(":")[0];
-
-    Key key = Key.from(keyTable).orElse(null);
+  public void onMessage(Message message, byte[] pattern) {
+    String channel = new String(message.getChannel());
+    String body = new String(message.getBody());
+    // TODO this might have to be revisited in the future
+    Key key = Key.from(channel.split(":")[1], body.split(":")[0]).orElse(null);
 
     if (key == null) {
       return;

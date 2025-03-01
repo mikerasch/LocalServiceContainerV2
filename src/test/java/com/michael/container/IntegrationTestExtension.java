@@ -1,7 +1,7 @@
 package com.michael.container;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,11 +19,11 @@ public class IntegrationTestExtension {
     var etcdTestConfiguration = new EtcdTestConfiguration();
 
     RedisTestConfiguration.setup();
-    etcdTestConfiguration.setUp();
+    etcdTestConfiguration.setup();
   }
 
-  @BeforeEach
-  public void beforeEach() {
+  @AfterEach
+  public void afterEach() {
     redisTestConfiguration.tearDown(redisTemplate);
   }
 }
