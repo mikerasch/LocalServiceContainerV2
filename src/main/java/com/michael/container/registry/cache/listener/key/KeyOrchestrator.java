@@ -27,7 +27,7 @@ public class KeyOrchestrator implements MessageListener {
   public void onMessage(Message message, byte[] pattern) {
     String channel = new String(message.getChannel());
     String body = new String(message.getBody());
-    // TODO this might have to be revisited in the future
+    // this will have to be revisited in the future
     Key key = Key.from(channel.split(":")[1], body.split(":")[0]).orElse(null);
 
     if (key == null) {

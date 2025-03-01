@@ -162,27 +162,22 @@ public class CrudRegistry {
   }
 
   public void updateTTL(
+      @Nonnull String applicationName,
+      @Nonnull String url,
+      int applicationVersion,
+      int port,
+      long ttl) {
+    updateTTLHelper(applicationName, url, applicationVersion, port, ttl);
+  }
+
+  public void updateTTL(
       @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
-    InstanceEntity instanceEntity =
-        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
-
-    instanceEntity.refreshTTL();
-
-    if (Status.HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS.contains(instanceEntity.getStatus())) {
-      Status previousStatus = instanceEntity.getStatus();
-      instanceEntity.setStatus(Status.HEALTHY);
-      eventPublisher.publishEvent(
-          new StatusChangeEvent(
-              applicationName, url, applicationVersion, port, previousStatus, Status.HEALTHY));
-      log.debug(
-          "Instance for application '{}', version '{}', url '{}', port '{}' transitioning from {} to HEALTHY.",
-          applicationName,
-          applicationVersion,
-          url,
-          port,
-          previousStatus);
-    }
-    instanceRepository.save(instanceEntity);
+    updateTTLHelper(
+        applicationName,
+        url,
+        applicationVersion,
+        port,
+        ContainerConstants.INSTANCE_ENTITY_DEFAULT_TIME_TO_LIVE);
   }
 
   public void updateStatusOnService(
@@ -198,18 +193,6 @@ public class CrudRegistry {
     Status previousStatus = instanceEntity.getStatus();
 
     instanceEntity.setStatus(status);
-
-    // TODO probably need to not put this here.
-    if (status == Status.UNDER_MAINTENANCE) {
-      instanceEntity.setTimeToLive(ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
-      log.info(
-          "Service '{}' version {} at {}:{} is transitioning to maintenance mode. TTL extended to 90 minutes ({} milli-seconds).",
-          applicationName,
-          applicationVersion,
-          url,
-          port,
-          ContainerConstants.INSTANCE_ENTITY_MAINTENANCE_TIME_TO_LIVE);
-    }
 
     log.debug(
         "Updating status of instance with applicationName: {}, version: {}, url: {}, port: {} to status: {}",
@@ -239,5 +222,29 @@ public class CrudRegistry {
                 new ResourceNotFoundException(
                     "Instance not found with composite key %s"
                         .formatted(instanceEntityCompositeKey)));
+  }
+
+  private void updateTTLHelper(
+      String applicationName, String url, int applicationVersion, int port, long ttl) {
+    InstanceEntity instanceEntity =
+        findInstanceEntityOrElseThrow(applicationName, url, applicationVersion, port);
+
+    instanceEntity.setTimeToLive(ttl);
+
+    if (Status.HEARTBEAT_STATUS_TO_HEALTHY_TRANSITIONS.contains(instanceEntity.getStatus())) {
+      Status previousStatus = instanceEntity.getStatus();
+      instanceEntity.setStatus(Status.HEALTHY);
+      eventPublisher.publishEvent(
+          new StatusChangeEvent(
+              applicationName, url, applicationVersion, port, previousStatus, Status.HEALTHY));
+      log.debug(
+          "Instance for application '{}', version '{}', url '{}', port '{}' transitioning from {} to HEALTHY.",
+          applicationName,
+          applicationVersion,
+          url,
+          port,
+          previousStatus);
+    }
+    instanceRepository.save(instanceEntity);
   }
 }
