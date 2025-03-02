@@ -1,6 +1,7 @@
 package com.michael.container.registry.cache.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseInstance {
@@ -48,5 +49,20 @@ public class BaseInstance {
 
   public void setPort(int port) {
     this.port = port;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    BaseInstance that = (BaseInstance) o;
+    return applicationVersion == that.applicationVersion
+        && port == that.port
+        && Objects.equals(applicationName, that.applicationName)
+        && Objects.equals(url, that.url);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(applicationName, applicationVersion, url, port);
   }
 }
