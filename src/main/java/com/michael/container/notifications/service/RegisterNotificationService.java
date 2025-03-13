@@ -2,6 +2,7 @@ package com.michael.container.notifications.service;
 
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
+import com.michael.container.notifications.repositories.PendingServiceNotificationQueueRepository;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import jakarta.annotation.Nonnull;
@@ -17,14 +18,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterNotificationService extends NotificationService {
   private final CrudRegistry crudRegistry;
-  private final Map<String, Set<ServiceNotificationRequest>> pendingServiceNotifications =
-      new ConcurrentHashMap<>();
+  private final PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository;
   private static final Logger logger = LoggerFactory.getLogger(RegisterNotificationService.class);
 
   protected RegisterNotificationService(
-      NotificationClient notificationClient, CrudRegistry crudRegistry) {
+          NotificationClient notificationClient, CrudRegistry crudRegistry, PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository) {
     super(notificationClient, crudRegistry);
     this.crudRegistry = crudRegistry;
+      this.pendingServiceNotificationQueueRepository = pendingServiceNotificationQueueRepository;
   }
 
   @Override
@@ -53,7 +54,6 @@ public class RegisterNotificationService extends NotificationService {
 
   @Scheduled(fixedRate = 4000L)
   public void processPendingNotifications() {
-    pendingServiceNotifications.forEach((key, value) -> sendInformationOnDependency(value, key));
   }
 
   private void sendInformationOnDependency(
@@ -90,6 +90,7 @@ public class RegisterNotificationService extends NotificationService {
 
   private void shouldRemoveFromPendingNotificationMap(
       String dependencyApplicationName, ServiceNotificationRequest serviceNotificationRequest) {
+
     Set<ServiceNotificationRequest> pendingRequests =
         pendingServiceNotifications.getOrDefault(dependencyApplicationName, new HashSet<>());
 
