@@ -18,13 +18,15 @@ public class HeartbeatService {
 
   /**
    * Processes a heartbeat request from a service and responds with the appropriate status.
-   * If the application is NOT found in the registry, it responds with RE_REGISTER.
-   * Otherwise, it refreshes the TTL of the service and returns FOUND.
-   * This will also transition the service from STARTING or DOWN -> HEALTHY
+   * <p>
+   * If the application is not found in the registry, this method responds with {@link HeartbeatEvent#RE_REGISTER}.
+   * If the application is found, it refreshes the Time-to-Live (TTL) of the service in the registry and returns
+   * {@link HeartbeatEvent#FOUND}. Additionally, the service is transitioned from either the {@link com.michael.container.registry.enums.Status#STARTING}
+   * or {@link com.michael.container.registry.enums.Status#DOWN} state to {@link com.michael.container.registry.enums.Status#HEALTHY}.
+   * </p>
    *
-   * @param heartbeatRequest a {@link HeartbeatRequest}
-   * @return A {@link HeartbeatResponse} indicating whether the service needs to be re-registered or
-   *         has been found in the registry.
+   * @param heartbeatRequest the {@link HeartbeatRequest} containing details about the service
+   * @return a {@link HeartbeatResponse} indicating whether the service needs to be re-registered or has been found in the registry
    */
   public HeartbeatResponse heartbeat(@Nonnull HeartbeatRequest heartbeatRequest) {
     RegisterServiceResponse registerServiceResponse =

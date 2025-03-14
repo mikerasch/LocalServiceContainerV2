@@ -19,8 +19,13 @@ public class HealthCheckClient {
   }
 
   /**
-   * Sends a GET request to the health check endpoint.
-   * Any exception will result in a {@link HealthCheckInvalidException}
+   * Sends a GET request to the specified health check endpoint.
+   * <p>
+   * If the request fails for any reason, a {@link HealthCheckInvalidException} is thrown with the
+   * exception message as the detail.
+   * </p>
+   *
+   * @param url the URL of the health check endpoint
    */
   public void checkHealth(@Nonnull String url) {
     try {

@@ -37,9 +37,14 @@ public class HealthCheckService {
   }
 
   /**
-   * Continuously dequeues health check entities and submits them for health-check processing.
-   * The method runs in a loop until there are no more health check entities in the queue (i.e., the
-   * dequeued entity is null)
+   * Continuously dequeues health check entities and submits them for health check processing.
+   * <p>
+   * This method runs in a loop, dequeuing {@link HealthQueueEntity} objects from the health check queue
+   * and submitting them for processing through the healthCheckExecutorService. The loop continues
+   * until there are no more entities in the queue (i.e., when the dequeued entity is {@code null}).
+   * </p>
+   *
+   * @return a list of {@link Future} objects representing the result of the health check processing tasks
    */
   public List<Future<?>> performCheck() {
     List<Future<?>> futures = new ArrayList<>();

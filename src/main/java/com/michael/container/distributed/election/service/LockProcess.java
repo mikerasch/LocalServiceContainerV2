@@ -9,6 +9,7 @@ import io.etcd.jetcd.op.Cmp;
 import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
+import jakarta.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,17 @@ public class LockProcess {
     this.etcdClient = etcdClient;
   }
 
-  public LockResult lock(String key, String value, long ttlDuration)
+  /**
+   * Acquires a lock by performing a conditional transaction on the key-value store.
+   * The lock is acquired if the specified key does not exist (version 0).
+   * The method uses a lease to ensure that the lock will expire after the given time-to-live (TTL).
+   *
+   * @param key the key to lock
+   * @param value the value associated with the lock
+   * @param ttlDuration the time-to-live duration for the lock in seconds
+   * @return a {@link LockResult} containing the lease ID and the transaction response
+   */
+  public LockResult lock(@Nonnull String key, @Nonnull String value, long ttlDuration)
       throws ExecutionException, InterruptedException {
     ByteSequence byteSequenceKey = ByteSequence.from(key, StandardCharsets.UTF_8);
     ByteSequence byteSequenceValue = ByteSequence.from(value, StandardCharsets.UTF_8);

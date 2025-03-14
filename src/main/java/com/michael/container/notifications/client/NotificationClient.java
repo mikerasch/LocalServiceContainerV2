@@ -23,8 +23,15 @@ public class NotificationClient {
   }
 
   /**
-   * Sends a service notification to the specified URL.
-   * A 2-second timeout is on both read/connect timeouts to stop long-winded calls from bogging down the system.
+   * Sends a service notification to the specified URL with a 2-second timeout for both read and connect operations.
+   * <p>
+   * This method ensures that long-running calls do not block the system by applying timeouts to both
+   * the connection and read phases. If an exception occurs during the notification process, a {@link NotificationException}
+   * is thrown.
+   * </p>
+   *
+   * @param url the URL to which the service notification should be sent
+   * @param serviceNotificationRequest the {@link ServiceNotificationRequest} containing the details of the notification
    */
   public void sendNotification(
       @Nonnull String url, @Nonnull ServiceNotificationRequest serviceNotificationRequest) {

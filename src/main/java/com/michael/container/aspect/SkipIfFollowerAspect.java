@@ -16,6 +16,14 @@ public class SkipIfFollowerAspect {
     this.electionState = electionState;
   }
 
+  /**
+   * Aspect handler for methods annotated with {@link com.michael.container.annotations.SkipIfFollower}.
+   * Skips the method execution if the service's role is {@link Role#FOLLOWER}.
+   *
+   * @param joinPoint the join point representing the method invocation
+   * @return the result of the method execution, or {@code null} if skipped
+   * @throws Throwable if the method execution throws an exception
+   */
   @Around("@annotation(com.michael.container.annotations.SkipIfFollower)")
   public Object skipIfFollower(ProceedingJoinPoint joinPoint) throws Throwable {
     if (electionState.getRole() == Role.FOLLOWER) {

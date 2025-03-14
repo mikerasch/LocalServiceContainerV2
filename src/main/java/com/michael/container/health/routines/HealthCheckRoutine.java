@@ -39,12 +39,19 @@ public class HealthCheckRoutine {
   }
 
   /**
-   * Periodically populates the health check queue with the application entities' health data.
+   * Periodically populates the health check queue with the health data of application entities.
+   * <p>
    * This method runs at a fixed rate (every 10 seconds) and collects all application entities from
-   * the repository. All entities will be translated to a health entity and added to the health entity queue
-   * for later processing.
-   * This method does not perform any action if the application entities list is empty or if the
-   * current role is {@link Role#FOLLOWER}.
+   * the repository. Each entity is translated into a health entity and added to the health entity queue
+   * for later processing. The health data is only added if the application entity is not {@code null}.
+   * </p>
+   * <p>
+   * The method does not perform any action if:
+   * <ul>
+   *   <li>The application entities list is empty.</li>
+   *   <li>The current role is {@link Role#FOLLOWER} (as determined by {@link SkipIfFollower}).</li>
+   * </ul>
+   * </p>
    */
   @Scheduled(fixedRate = 10000L)
   @SkipIfFollower

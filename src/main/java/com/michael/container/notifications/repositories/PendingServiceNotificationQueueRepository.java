@@ -23,6 +23,16 @@ public class PendingServiceNotificationQueueRepository {
     this.redisTemplate = redisTemplate;
   }
 
+  /**
+   * Adds a {@link PendingServiceNotificationEntity} to the Redis sorted set for delayed processing.
+   * <p>
+   * The entity is added to the sorted set with a score equal to the current system time plus a
+   * predefined delay (configured in {@link ContainerConstants#MILLISECOND_DURATION_DELAY_OF_PENDING_SERVICE_NOTIFICATION}).
+   * This ensures that the notification will be processed after the specified delay.
+   * </p>
+   *
+   * @param entity the {@link PendingServiceNotificationEntity} to be added to the Redis sorted set
+   */
   public void enqueue(@Nonnull PendingServiceNotificationEntity entity) {
     long delayedTime =
         System.currentTimeMillis()
@@ -30,6 +40,16 @@ public class PendingServiceNotificationQueueRepository {
     redisTemplate.opsForZSet().add(PENDING_SERVICE_QUEUE_PATTERN_NAME, entity, delayedTime);
   }
 
+  /**
+   * Dequeues pending service notifications from the Redis sorted set.
+   * <p>
+   * This method retrieves all {@link PendingServiceNotificationEntity} objects from the sorted set
+   * in Redis where the score is less than or equal to the current system time (i.e., pending notifications
+   * that are ready to be processed). The method then removes the dequeued entities from the Redis sorted set.
+   * </p>
+   *
+   * @return a list of {@link PendingServiceNotificationEntity} objects that are ready to be processed
+   */
   public List<PendingServiceNotificationEntity> dequeue() {
     long currentTime = System.currentTimeMillis();
 
