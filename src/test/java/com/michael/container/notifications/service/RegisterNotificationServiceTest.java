@@ -54,6 +54,8 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
 
   @Autowired RedisTemplate<String, PendingServiceNotificationEntity> redisTemplate;
 
+  @Autowired ElectionState electionState;
+
   @TestConfiguration
   static class TestConfig {
     @Bean

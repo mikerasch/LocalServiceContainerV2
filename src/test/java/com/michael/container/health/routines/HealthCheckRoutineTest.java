@@ -1,5 +1,6 @@
 package com.michael.container.health.routines;
 
+import com.michael.container.IntegrationTestExtension;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.health.repositories.HealthQueueRepository;
@@ -11,42 +12,40 @@ import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @ExtendWith(MockitoExtension.class)
-class HealthCheckRoutineTest {
-  @InjectMocks HealthCheckRoutine healthCheckRoutine;
+class HealthCheckRoutineTest extends IntegrationTestExtension {
+  @Autowired HealthCheckRoutine healthCheckRoutine;
 
-  @Mock HealthQueueRepository healthQueueRepository;
+  @MockitoBean HealthQueueRepository healthQueueRepository;
 
-  @Mock ApplicationRepository applicationRepository;
+  @MockitoBean ApplicationRepository applicationRepository;
 
-  @Mock ElectionState electionState;
+  @MockitoBean ElectionState electionState;
 
   @Test
   void populateHealthCheckQueue_Follower_EarlyReturn() {
-    Mockito.when(applicationRepository.findAll())
-        .thenReturn(Collections.singletonList(new ApplicationEntity()));
     Mockito.when(electionState.getRole()).thenReturn(Role.FOLLOWER);
 
     healthCheckRoutine.populateHealthCheckQueue();
 
-    Mockito.verify(applicationRepository).findAll();
+    Mockito.verifyNoInteractions(applicationRepository);
     Mockito.verify(electionState).getRole();
     Mockito.verifyNoInteractions(healthQueueRepository);
   }
 
   @Test
-  void populateHealthCheckQueue_NoEntities_EarlyReturn() {
+  void populateHealthCheckQueue_Leader_NoEntities_EarlyReturn() {
     Mockito.when(applicationRepository.findAll()).thenReturn(Collections.emptyList());
+    Mockito.when(electionState.getRole()).thenReturn(Role.LEADER);
 
     healthCheckRoutine.populateHealthCheckQueue();
 
     Mockito.verify(applicationRepository).findAll();
-    Mockito.verifyNoInteractions(electionState);
     Mockito.verifyNoInteractions(healthQueueRepository);
   }
 

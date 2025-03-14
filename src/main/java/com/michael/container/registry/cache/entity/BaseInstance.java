@@ -53,6 +53,7 @@ public class BaseInstance {
 
   @Override
   public boolean equals(Object o) {
+    if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     BaseInstance that = (BaseInstance) o;
     return applicationVersion == that.applicationVersion
@@ -64,5 +65,21 @@ public class BaseInstance {
   @Override
   public int hashCode() {
     return Objects.hash(applicationName, applicationVersion, url, port);
+  }
+
+  @Override
+  public String toString() {
+    return "BaseInstance{"
+        + "applicationName='"
+        + applicationName
+        + '\''
+        + ", applicationVersion="
+        + applicationVersion
+        + ", url='"
+        + url
+        + '\''
+        + ", port="
+        + port
+        + '}';
   }
 }

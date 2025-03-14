@@ -26,7 +26,7 @@ public class PendingServiceNotificationQueueRepository {
   public void enqueue(@Nonnull PendingServiceNotificationEntity entity) {
     long delayedTime =
         System.currentTimeMillis()
-            + ContainerConstants.MILLISECOND_DURATION_DELAY_OF_PENDING_SERVICE_NOTIFCATION;
+            + ContainerConstants.MILLISECOND_DURATION_DELAY_OF_PENDING_SERVICE_NOTIFICATION;
     redisTemplate.opsForZSet().add(PENDING_SERVICE_QUEUE_PATTERN_NAME, entity, delayedTime);
   }
 
@@ -47,9 +47,7 @@ public class PendingServiceNotificationQueueRepository {
                       .rangeByScoreWithScores(
                           PENDING_SERVICE_QUEUE_PATTERN_NAME,
                           Double.NEGATIVE_INFINITY,
-                          currentTime,
-                          0,
-                          ContainerConstants.NUMBER_OF_PENDING_SERVICE_NOTIFICATION_TO_QUEUE - 1L);
+                          currentTime);
 
               if (CollectionUtils.isNotEmpty(range)) {
                 pendingServiceNotificationEntities =

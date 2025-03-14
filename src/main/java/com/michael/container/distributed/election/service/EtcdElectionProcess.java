@@ -3,16 +3,11 @@ package com.michael.container.distributed.election.service;
 import com.michael.container.distributed.election.config.EtcdConfiguration;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.model.LeaderKeyDeletionEvent;
+import com.michael.container.distributed.election.model.LockResult;
 import com.michael.container.distributed.election.observer.LeaseRenewalStreamObserver;
 import com.michael.container.distributed.election.state.ElectionState;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
-import io.etcd.jetcd.kv.TxnResponse;
-import io.etcd.jetcd.lease.LeaseGrantResponse;
-import io.etcd.jetcd.op.Cmp;
-import io.etcd.jetcd.op.CmpTarget;
-import io.etcd.jetcd.op.Op;
-import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchResponse;
@@ -32,16 +27,19 @@ public class EtcdElectionProcess implements ElectionProcess {
   private final EtcdConfiguration etcdConfiguration;
   private final ElectionState electionState;
   private final ApplicationEventPublisher eventPublisher;
+  private final LockProcess lockProcess;
 
   public EtcdElectionProcess(
       Client etcdClient,
       EtcdConfiguration etcdConfiguration,
       ApplicationEventPublisher eventPublisher,
-      ElectionState electionState) {
+      ElectionState electionState,
+      LockProcess lockProcess) {
     this.etcdClient = etcdClient;
     this.etcdConfiguration = etcdConfiguration;
     this.eventPublisher = eventPublisher;
     this.electionState = electionState;
+    this.lockProcess = lockProcess;
   }
 
   /**
@@ -71,30 +69,15 @@ public class EtcdElectionProcess implements ElectionProcess {
   @Override
   public void startLeaderElection() {
     boolean acquiredLeadership = false;
-    LeaseGrantResponse leaseResponse = etcdClient.getLeaseClient().grant(5L).join();
-    electionState.setLeaseId(leaseResponse.getID());
-    ByteSequence key =
-        ByteSequence.from(etcdConfiguration.getEtcdLeaderKey(), StandardCharsets.UTF_8);
-    ByteSequence value =
-        ByteSequence.from(
-            etcdConfiguration.getServiceUniqueIdentifier().toString(), StandardCharsets.UTF_8);
-
-    Cmp keyExists = new Cmp(key, Cmp.Op.EQUAL, CmpTarget.version(0));
-
-    PutOption putOption = PutOption.builder().withLeaseId(electionState.getLeaseId()).build();
-
     try {
       // Try and be efficient, we wrap all the computations into one request
-      TxnResponse txnResponse =
-          etcdClient
-              .getKVClient()
-              .txn()
-              .If(keyExists)
-              .Then(Op.put(key, value, putOption))
-              .commit()
-              .get();
-
-      if (txnResponse.isSucceeded()) {
+      LockResult lockResult =
+          lockProcess.lock(
+              etcdConfiguration.getEtcdLeaderKey(),
+              etcdConfiguration.getServiceUniqueIdentifier().toString(),
+              5L);
+      electionState.setLeaseId(lockResult.leaseId());
+      if (lockResult.txnResponse().isSucceeded()) {
         acquiredLeadership = true;
         logger.info("Server elected as leader...");
         startLeaseRenewal();
