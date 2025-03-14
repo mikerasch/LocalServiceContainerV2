@@ -66,20 +66,4 @@ public class BaseInstance {
   public int hashCode() {
     return Objects.hash(applicationName, applicationVersion, url, port);
   }
-
-  @Override
-  public String toString() {
-    return "BaseInstance{"
-        + "applicationName='"
-        + applicationName
-        + '\''
-        + ", applicationVersion="
-        + applicationVersion
-        + ", url='"
-        + url
-        + '\''
-        + ", port="
-        + port
-        + '}';
-  }
 }
