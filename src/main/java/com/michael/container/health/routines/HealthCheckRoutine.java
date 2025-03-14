@@ -3,6 +3,7 @@ package com.michael.container.health.routines;
 import static com.michael.container.registry.enums.Status.STATUSES_TO_SKIP_HEARTBEAT;
 
 import com.google.common.collect.Lists;
+import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.health.repositories.HealthQueueRepository;
@@ -46,10 +47,11 @@ public class HealthCheckRoutine {
    * current role is {@link Role#FOLLOWER}.
    */
   @Scheduled(fixedRate = 10000L)
+  @SkipIfFollower
   public void populateHealthCheckQueue() {
     List<ApplicationEntity> applicationEntities =
         Lists.newArrayList(applicationRepository.findAll());
-    if (applicationEntities.isEmpty() || electionState.getRole() == Role.FOLLOWER) {
+    if (applicationEntities.isEmpty()) {
       return;
     }
 

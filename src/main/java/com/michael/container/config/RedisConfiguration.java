@@ -3,6 +3,7 @@ package com.michael.container.config;
 import static com.michael.container.utils.ContainerConstants.HEALTH_QUEUE_PATTERN_NAME;
 
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
+import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
 import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,15 +26,30 @@ public class RedisConfiguration {
   }
 
   @Bean
-  @SuppressWarnings("java:S1452") // Redis handles serialization
-  public RedisTemplate<?, ?> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-    RedisTemplate<?, ?> template = new RedisTemplate<>();
+  @SuppressWarnings("java:S1452")
+  public RedisTemplate<String, HealthQueueEntity> redisTemplateHealthQueue(
+      RedisConnectionFactory redisConnectionFactory) {
+    RedisTemplate<String, HealthQueueEntity> template = new RedisTemplate<>();
     template.setKeySerializer(new StringRedisSerializer());
     template.setConnectionFactory(redisConnectionFactory);
-    Jackson2JsonRedisSerializer<HealthQueueEntity> serializer =
+    Jackson2JsonRedisSerializer<HealthQueueEntity> healthQueueEntityJackson2JsonRedisSerializer =
         new Jackson2JsonRedisSerializer<>(HealthQueueEntity.class);
-    template.setValueSerializer(serializer);
-    template.setHashValueSerializer(serializer);
+    template.setValueSerializer(healthQueueEntityJackson2JsonRedisSerializer);
+    template.setHashValueSerializer(healthQueueEntityJackson2JsonRedisSerializer);
+    return template;
+  }
+
+  @Bean
+  public RedisTemplate<String, PendingServiceNotificationEntity>
+      pendingServiceNotificationEntityRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+    RedisTemplate<String, PendingServiceNotificationEntity> template = new RedisTemplate<>();
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setConnectionFactory(redisConnectionFactory);
+    Jackson2JsonRedisSerializer<PendingServiceNotificationEntity>
+        pendingServiceNotificationEntityJackson2JsonRedisSerializer =
+            new Jackson2JsonRedisSerializer<>(PendingServiceNotificationEntity.class);
+    template.setValueSerializer(pendingServiceNotificationEntityJackson2JsonRedisSerializer);
+    template.setHashValueSerializer(pendingServiceNotificationEntityJackson2JsonRedisSerializer);
     return template;
   }
 

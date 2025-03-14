@@ -53,6 +53,7 @@ public class BaseInstance {
 
   @Override
   public boolean equals(Object o) {
+    if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     BaseInstance that = (BaseInstance) o;
     return applicationVersion == that.applicationVersion

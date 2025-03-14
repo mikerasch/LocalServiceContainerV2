@@ -1,12 +1,18 @@
 package com.michael.container.notifications.service;
 
+import static com.michael.container.utils.ContainerConstants.PENDING_SERVICE_QUEUE_PATTERN_NAME;
+
 import com.michael.container.RedisTestConfiguration;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotificationType;
+import com.michael.container.notifications.mapper.PendingServiceNotificationEntityToServiceNotificationRequestMapper;
+import com.michael.container.notifications.mapper.ServiceNotificationRequestToPendingServiceNotificationEntityMapper;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
+import com.michael.container.notifications.repositories.PendingServiceNotificationQueueRepository;
 import com.michael.container.registry.cache.crud.CrudRegistry;
+import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
 import com.michael.container.registry.cache.repositories.InstanceRepository;
 import com.michael.container.registry.enums.Status;
@@ -15,8 +21,6 @@ import com.michael.container.registry.mapper.RegisterServiceResponseToInstanceEn
 import com.michael.container.registry.model.RegisterServiceResponse;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,15 +30,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @ExtendWith(MockitoExtension.class)
-@DataRedisTest
+@Import(PendingServiceNotificationQueueRepository.class)
 // TODO CLEAN UP TO FIXTURES
 class RegisterNotificationServiceTest extends RedisTestConfiguration {
   RegisterNotificationService service;
@@ -46,6 +50,11 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
   @Mock ApplicationEventPublisher publisher;
   @Autowired ApplicationRepository applicationRepository;
   @Autowired InstanceRepository instanceRepository;
+  @Autowired PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository;
+
+  @Autowired RedisTemplate<String, PendingServiceNotificationEntity> redisTemplate;
+
+  @Autowired ElectionState electionState;
 
   @TestConfiguration
   static class TestConfig {
@@ -62,10 +71,19 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
     DefaultConversionService defaultConversionService = new DefaultConversionService();
     defaultConversionService.addConverter(new RegisterServiceResponseToInstanceEntityMapper());
     defaultConversionService.addConverter(new InstanceEntityToRegisterServiceResponseMapper());
+    defaultConversionService.addConverter(
+        new PendingServiceNotificationEntityToServiceNotificationRequestMapper());
+    defaultConversionService.addConverter(
+        new ServiceNotificationRequestToPendingServiceNotificationEntityMapper());
     crudRegistry =
         new CrudRegistry(
             publisher, applicationRepository, instanceRepository, defaultConversionService);
-    service = new RegisterNotificationService(notificationClient, crudRegistry);
+    service =
+        new RegisterNotificationService(
+            notificationClient,
+            crudRegistry,
+            pendingServiceNotificationQueueRepository,
+            defaultConversionService);
   }
 
   @Test
@@ -250,13 +268,18 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
 
     service.notify(serviceNotificationRequest);
 
+    var queue =
+        redisTemplate
+            .opsForZSet()
+            .range(PENDING_SERVICE_QUEUE_PATTERN_NAME, Long.MIN_VALUE, Long.MAX_VALUE)
+            .stream()
+            .toList();
+
     Mockito.verify(notificationClient, Mockito.times(1))
         .sendNotification(Mockito.any(), Mockito.any());
-    Assertions.assertTrue(
-        ((Map<String, Object>)
-                Objects.requireNonNull(
-                    ReflectionTestUtils.getField(service, "pendingServiceNotifications")))
-            .containsKey("someOtherOtherApplication"));
+    Assertions.assertEquals(1, queue.size());
+    Assertions.assertEquals(
+        "someOtherOtherApplication", queue.get(0).getDependencyApplicationName());
   }
 
   @Test
@@ -301,14 +324,24 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
             new HashMap<>()));
     set.forEach(response -> crudRegistry.insert(response));
 
+    redisTemplate
+        .opsForZSet()
+        .range(PENDING_SERVICE_QUEUE_PATTERN_NAME, Long.MIN_VALUE, Long.MAX_VALUE)
+        .forEach(
+            entity ->
+                redisTemplate.opsForZSet().add(PENDING_SERVICE_QUEUE_PATTERN_NAME, entity, 1));
+
     service.processPendingNotifications();
+
+    var queue =
+        redisTemplate
+            .opsForZSet()
+            .range(PENDING_SERVICE_QUEUE_PATTERN_NAME, Long.MIN_VALUE, Long.MAX_VALUE)
+            .stream()
+            .toList();
 
     Mockito.verify(notificationClient, Mockito.times(2))
         .sendNotification(Mockito.any(), Mockito.any());
-    Assertions.assertTrue(
-        ((Map<String, Object>)
-                Objects.requireNonNull(
-                    ReflectionTestUtils.getField(service, "pendingServiceNotifications")))
-            .isEmpty());
+    Assertions.assertTrue(queue.isEmpty());
   }
 }

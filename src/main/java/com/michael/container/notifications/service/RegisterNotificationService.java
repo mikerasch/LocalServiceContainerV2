@@ -1,30 +1,37 @@
 package com.michael.container.notifications.service;
 
+import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.notifications.client.NotificationClient;
+import com.michael.container.notifications.enums.NotifyEvent;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
+import com.michael.container.notifications.repositories.PendingServiceNotificationQueueRepository;
 import com.michael.container.registry.cache.crud.CrudRegistry;
+import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
 import com.michael.container.registry.model.RegisterServiceResponse;
 import jakarta.annotation.Nonnull;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RegisterNotificationService extends NotificationService {
   private final CrudRegistry crudRegistry;
-  private final Map<String, Set<ServiceNotificationRequest>> pendingServiceNotifications =
-      new ConcurrentHashMap<>();
+  private final PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository;
+  private final ConversionService conversionService;
   private static final Logger logger = LoggerFactory.getLogger(RegisterNotificationService.class);
 
   protected RegisterNotificationService(
-      NotificationClient notificationClient, CrudRegistry crudRegistry) {
+      NotificationClient notificationClient,
+      CrudRegistry crudRegistry,
+      PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository,
+      ConversionService conversionService) {
     super(notificationClient, crudRegistry);
     this.crudRegistry = crudRegistry;
+    this.pendingServiceNotificationQueueRepository = pendingServiceNotificationQueueRepository;
+    this.conversionService = conversionService;
   }
 
   @Override
@@ -48,25 +55,27 @@ public class RegisterNotificationService extends NotificationService {
         .dependsOn()
         .forEach(
             dependencyApplicationName ->
-                sendInformationOnDependency(serviceNotificationRequest, dependencyApplicationName));
+                sendInformationOnDependency(
+                    serviceNotificationRequest, dependencyApplicationName, NotifyEvent.GENERAL));
   }
 
   @Scheduled(fixedRate = 4000L)
+  @SkipIfFollower
   public void processPendingNotifications() {
-    pendingServiceNotifications.forEach((key, value) -> sendInformationOnDependency(value, key));
-  }
-
-  private void sendInformationOnDependency(
-      Set<ServiceNotificationRequest> serviceNotificationRequests,
-      String dependencyApplicationName) {
-    serviceNotificationRequests.parallelStream()
+    pendingServiceNotificationQueueRepository.dequeue().parallelStream()
         .forEach(
-            notificationRequest ->
-                sendInformationOnDependency(notificationRequest, dependencyApplicationName));
+            pendingServiceNotificationEntity ->
+                sendInformationOnDependency(
+                    conversionService.convert(
+                        pendingServiceNotificationEntity, ServiceNotificationRequest.class),
+                    pendingServiceNotificationEntity.getDependencyApplicationName(),
+                    NotifyEvent.SCHEDULED));
   }
 
   private void sendInformationOnDependency(
-      ServiceNotificationRequest serviceNotificationRequest, String dependencyApplicationName) {
+      ServiceNotificationRequest serviceNotificationRequest,
+      String dependencyApplicationName,
+      NotifyEvent event) {
     Set<RegisterServiceResponse> dependencies =
         crudRegistry.findByApplicationName(dependencyApplicationName);
 
@@ -74,11 +83,13 @@ public class RegisterNotificationService extends NotificationService {
       logger.info(
           "Dependency {} is currently unregistered, will be notified once available.",
           dependencyApplicationName);
-      addToPendingNotification(dependencyApplicationName, serviceNotificationRequest);
+      addToPendingNotification(serviceNotificationRequest, dependencyApplicationName);
       return;
     }
 
-    shouldRemoveFromPendingNotificationMap(dependencyApplicationName, serviceNotificationRequest);
+    if (event == NotifyEvent.GENERAL) {
+      removeFromPendingNotifications(serviceNotificationRequest, dependencyApplicationName);
+    }
 
     String url =
         NOTIFICATION_URL.formatted(
@@ -88,37 +99,21 @@ public class RegisterNotificationService extends NotificationService {
         .forEach(registerServiceResponse -> sendNotification(url, serviceNotificationRequest));
   }
 
-  private void shouldRemoveFromPendingNotificationMap(
-      String dependencyApplicationName, ServiceNotificationRequest serviceNotificationRequest) {
-    Set<ServiceNotificationRequest> pendingRequests =
-        pendingServiceNotifications.getOrDefault(dependencyApplicationName, new HashSet<>());
-
-    if (pendingRequests.isEmpty()) {
-      return;
-    }
-
-    boolean removed = pendingRequests.remove(serviceNotificationRequest);
-
-    if (removed) {
-      logger.info(
-          "Removed pending notification for service: {} due to dependency: {} being registered.",
-          serviceNotificationRequest.applicationName(),
-          dependencyApplicationName);
-    }
-
-    if (pendingRequests.isEmpty()) {
-      logger.info(
-          "No more pending notifications for dependency: {}, removed from pending list.",
-          dependencyApplicationName);
-      pendingServiceNotifications.remove(dependencyApplicationName);
-    }
+  private void removeFromPendingNotifications(
+      ServiceNotificationRequest serviceNotificationRequest, String dependencyApplicationName) {
+    var entity =
+        conversionService.convert(
+            serviceNotificationRequest, PendingServiceNotificationEntity.class);
+    entity.setDependencyApplicationName(dependencyApplicationName);
+    pendingServiceNotificationQueueRepository.remove(entity);
   }
 
-  // TODO THIS WILL CAUSE DOUBLE INSERTS. NOT A BIG DEAL - BUT IS INEFFICIENT
   private void addToPendingNotification(
-      String dependencyApplicationName, ServiceNotificationRequest serviceNotificationRequest) {
-    pendingServiceNotifications
-        .computeIfAbsent(dependencyApplicationName, k -> ConcurrentHashMap.newKeySet())
-        .add(serviceNotificationRequest);
+      ServiceNotificationRequest serviceNotificationRequest, String dependencyApplicationName) {
+    var entity =
+        conversionService.convert(
+            serviceNotificationRequest, PendingServiceNotificationEntity.class);
+    entity.setDependencyApplicationName(dependencyApplicationName);
+    pendingServiceNotificationQueueRepository.enqueue(entity);
   }
 }

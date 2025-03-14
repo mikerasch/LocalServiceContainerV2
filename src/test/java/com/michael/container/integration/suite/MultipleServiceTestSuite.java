@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
@@ -27,7 +26,6 @@ import org.wiremock.spring.InjectWireMock;
   @ConfigureWireMock(name = "first-service"),
   @ConfigureWireMock(name = "second-service")
 })
-@DirtiesContext // TODO CHANGE WHEN WE GET RID OF THE MAP IN REGISTERNOTIFICATIONSERVICE
 class MultipleServiceTestSuite extends IntegrationTestExtension {
   @Autowired ServiceRegistryService serviceRegistryService;
 
