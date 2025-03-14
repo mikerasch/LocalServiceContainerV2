@@ -46,10 +46,17 @@ public class CrudRegistry {
 
   /**
    * Inserts a new instance into the application repository or updates an existing one based on the provided
-   * {@link RegisterServiceResponse}. If the application does not already exist, a new application entity is created.
-   * After the instance is saved, it is added to the application entity, and the application is saved or updated.
-   * Additionally, an event of type {@link StatusChangeEvent} is published with the details from the
-   * {@link RegisterServiceResponse}, including the application name, URL, version, before and after status change, and port.
+   * {@link RegisterServiceResponse}.
+   * <p>
+   * If the application does not already exist, a new application entity is created. After the instance is saved,
+   * it is added to the application entity, and the application is either saved or updated accordingly.
+   * Additionally, an event of type {@link StatusChangeEvent} is published with details from the
+   * {@link RegisterServiceResponse}, including the application name, URL, version, port,
+   * and the status change (before and after).
+   * </p>
+   *
+   * @param registerServiceResponse the {@link RegisterServiceResponse} containing the service instance information
+   *                               to be inserted or updated in the repository
    */
   public void insert(@Nonnull RegisterServiceResponse registerServiceResponse) {
     var applicationEntity =
@@ -86,9 +93,14 @@ public class CrudRegistry {
 
   /**
    * Fetches all registered services and their corresponding instances.
-   * The resulting map is organized by the application name
-   * as the key, with a set of {@link RegisterServiceResponse} as the value, representing the instances of
-   * each service.
+   * <p>
+   * This method retrieves all applications from the repository and, for each application, collects
+   * its associated service instances. The resulting map is organized by the application name as the key,
+   * with a set of {@link RegisterServiceResponse} as the value, representing the instances of each service.
+   * </p>
+   *
+   * @return a map where the key is the application name, and the value is a set of {@link RegisterServiceResponse}
+   *         representing the registered service instances for each application
    */
   public Map<String, Set<RegisterServiceResponse>> fetchAll() {
     Map<String, Set<RegisterServiceResponse>> result = new HashMap<>();
@@ -111,7 +123,14 @@ public class CrudRegistry {
 
   /**
    * Finds and retrieves the registered service instances for a specific application.
+   * <p>
+   * This method searches for an application by its name and retrieves all associated service instances.
    * If no application is found for the given name, an empty set is returned.
+   * </p>
+   *
+   * @param applicationName the name of the application whose service instances are to be retrieved
+   * @return a set of {@link RegisterServiceResponse} containing the registered service instances for the given application,
+   *         or an empty set if no application is found
    */
   public Set<RegisterServiceResponse> findByApplicationName(@Nonnull String applicationName) {
     ApplicationEntity applicationEntity =
@@ -128,8 +147,17 @@ public class CrudRegistry {
 
   /**
    * Finds a single registered service instance based on application name, URL, port, and version.
+   * <p>
    * This method searches for a specific service instance using a composite key formed from the provided
-   * application name, URL, port.
+   * application name, URL, port, and version. If the service instance is found, it is converted into a
+   * {@link RegisterServiceResponse} and returned as an {@link Optional}.
+   * </p>
+   *
+   * @param applicationName the name of the application whose service instance is being searched for
+   * @param url the URL of the service instance to find
+   * @param port the port of the service instance to find
+   * @param version the version of the service instance to find
+   * @return an {@link Optional} containing the {@link RegisterServiceResponse} if found, or an empty {@link Optional} if not
    */
   public Optional<RegisterServiceResponse> findOne(
       @Nonnull String applicationName, @Nonnull String url, int port, int version) {
@@ -140,11 +168,18 @@ public class CrudRegistry {
 
   /**
    * Removes a registered service instance and its associated application if necessary.
+   * <p>
    * This method deletes a service instance from the repository using a composite key formed from the provided
    * application name, URL, application version, and port. After the instance is removed, it checks if there are
    * any remaining instances for the application. If no instances are left, the application entity is also deleted
    * from the repository. Finally, a {@link DeregisterEvent} is published to notify other components of the
    * service deregistration.
+   * </p>
+   *
+   * @param applicationName the name of the application to which the service instance belongs
+   * @param url the URL of the service instance to be removed
+   * @param applicationVersion the version of the application instance to be removed
+   * @param port the port of the service instance to be removed
    */
   public void remove(
       @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
@@ -161,6 +196,14 @@ public class CrudRegistry {
         new DeregisterEvent(applicationName, url, applicationVersion, port));
   }
 
+  /**
+   * Updates the Time-to-Live (TTL) for a service instance in the registry.
+   * Allows the user to specify a ttl in milliseconds.
+   * @param applicationName the name of the application for the service instance
+   * @param url the URL of the service instance
+   * @param applicationVersion the version of the application instance
+   * @param port the port of the service instance
+   */
   public void updateTTL(
       @Nonnull String applicationName,
       @Nonnull String url,
@@ -170,6 +213,14 @@ public class CrudRegistry {
     updateTTLHelper(applicationName, url, applicationVersion, port, ttl);
   }
 
+  /**
+   * Updates the Time-to-Live (TTL) for a service instance in the registry.
+   * This uses the default TTL value as defined by {@link ContainerConstants#INSTANCE_ENTITY_DEFAULT_TIME_TO_LIVE}
+   * @param applicationName the name of the application for the service instance
+   * @param url the URL of the service instance
+   * @param applicationVersion the version of the application instance
+   * @param port the port of the service instance
+   */
   public void updateTTL(
       @Nonnull String applicationName, @Nonnull String url, int applicationVersion, int port) {
     updateTTLHelper(
@@ -180,6 +231,23 @@ public class CrudRegistry {
         ContainerConstants.INSTANCE_ENTITY_DEFAULT_TIME_TO_LIVE);
   }
 
+  /**
+   * Updates the status of a service instance and optionally publishes a status change event.
+   * <p>
+   * This method finds the {@link InstanceEntity} based on the provided application details
+   * (name, URL, version, and port) and updates its status to the new status provided.
+   * If {@code shouldFollowStateMachine} is {@code true}, a {@link StatusChangeEvent} is published
+   * to notify listeners of the status change.
+   * </p>
+   *
+   * @param applicationName the name of the application whose instance status is being updated
+   * @param url the URL of the service instance whose status is being updated
+   * @param applicationVersion the version of the application instance
+   * @param port the port of the service instance whose status is being updated
+   * @param status the new {@link Status} to update the service instance with
+   * @param shouldFollowStateMachine flag indicating whether to publish a status change event
+   *        to follow the state machine logic
+   */
   public void updateStatusOnService(
       @Nonnull String applicationName,
       @Nonnull String url,
