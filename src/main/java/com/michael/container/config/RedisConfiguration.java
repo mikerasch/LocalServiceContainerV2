@@ -27,7 +27,8 @@ public class RedisConfiguration {
 
   @Bean
   @SuppressWarnings("java:S1452")
-  public RedisTemplate<String, HealthQueueEntity> redisTemplateHealthQueue(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<String, HealthQueueEntity> redisTemplateHealthQueue(
+      RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<String, HealthQueueEntity> template = new RedisTemplate<>();
     template.setKeySerializer(new StringRedisSerializer());
     template.setConnectionFactory(redisConnectionFactory);
@@ -39,11 +40,13 @@ public class RedisConfiguration {
   }
 
   @Bean
-  public RedisTemplate<String, PendingServiceNotificationEntity> pendingServiceNotificationEntityRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+  public RedisTemplate<String, PendingServiceNotificationEntity>
+      pendingServiceNotificationEntityRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
     RedisTemplate<String, PendingServiceNotificationEntity> template = new RedisTemplate<>();
     template.setKeySerializer(new StringRedisSerializer());
     template.setConnectionFactory(redisConnectionFactory);
-    Jackson2JsonRedisSerializer<PendingServiceNotificationEntity> pendingServiceNotificationEntityJackson2JsonRedisSerializer =
+    Jackson2JsonRedisSerializer<PendingServiceNotificationEntity>
+        pendingServiceNotificationEntityJackson2JsonRedisSerializer =
             new Jackson2JsonRedisSerializer<>(PendingServiceNotificationEntity.class);
     template.setValueSerializer(pendingServiceNotificationEntityJackson2JsonRedisSerializer);
     template.setHashValueSerializer(pendingServiceNotificationEntityJackson2JsonRedisSerializer);
