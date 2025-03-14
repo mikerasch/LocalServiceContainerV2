@@ -1,6 +1,7 @@
 package com.michael.container.notifications.service;
 
 import com.michael.container.notifications.client.NotificationClient;
+import com.michael.container.notifications.enums.NotifyEvent;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.notifications.repositories.PendingServiceNotificationQueueRepository;
 import com.michael.container.registry.cache.crud.CrudRegistry;
@@ -53,7 +54,8 @@ public class RegisterNotificationService extends NotificationService {
         .dependsOn()
         .forEach(
             dependencyApplicationName ->
-                sendInformationOnDependency(serviceNotificationRequest, dependencyApplicationName));
+                sendInformationOnDependency(
+                    serviceNotificationRequest, dependencyApplicationName, NotifyEvent.GENERAL));
   }
 
   @Scheduled(fixedRate = 4000L)
@@ -64,11 +66,14 @@ public class RegisterNotificationService extends NotificationService {
                 sendInformationOnDependency(
                     conversionService.convert(
                         pendingServiceNotificationEntity, ServiceNotificationRequest.class),
-                    pendingServiceNotificationEntity.getDependencyApplicationName()));
+                    pendingServiceNotificationEntity.getDependencyApplicationName(),
+                    NotifyEvent.SCHEDULED));
   }
 
   private void sendInformationOnDependency(
-      ServiceNotificationRequest serviceNotificationRequest, String dependencyApplicationName) {
+      ServiceNotificationRequest serviceNotificationRequest,
+      String dependencyApplicationName,
+      NotifyEvent event) {
     Set<RegisterServiceResponse> dependencies =
         crudRegistry.findByApplicationName(dependencyApplicationName);
 
@@ -80,7 +85,9 @@ public class RegisterNotificationService extends NotificationService {
       return;
     }
 
-    removeFromPendingNotifications(serviceNotificationRequest, dependencyApplicationName);
+    if (event == NotifyEvent.GENERAL) {
+      removeFromPendingNotifications(serviceNotificationRequest, dependencyApplicationName);
+    }
 
     String url =
         NOTIFICATION_URL.formatted(
