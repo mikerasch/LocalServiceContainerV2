@@ -109,27 +109,27 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
-									"pm.test(\"Response matches expected data\", function () {\r",
+									"\r",
+									"pm.test(\"All statuses are STARTING\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
-									"    var expectedData = {\r",
-									"        \"test-application-v1\": [\r",
-									"            {\r",
-									"                \"applicationName\": \"test-application-v1\",\r",
-									"                \"applicationVersion\": 1,\r",
-									"                \"url\": \"http://10.10.10.10\",\r",
-									"                \"port\": 8080,\r",
-									"                \"status\": \"STARTING\",\r",
-									"                \"dependsOn\": [],\r",
-									"                \"metaData\": {}\r",
-									"            }\r",
-									"        ]\r",
-									"    };\r",
-									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"\r",
+									"    jsonData[\"test-application-v1\"].forEach(function (app) {\r",
+									"        pm.expect(app.status).to.eql(\"STARTING\");\r",
+									"    });\r",
 									"});\r",
+									"\r",
+									"\r",
 									""
 								],
 								"type": "text/javascript",
 								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -149,7 +149,7 @@
 					"response": []
 				},
 				{
-					"name": "Wait and Ensure Health Check Fails and Removes",
+					"name": "Run Health Check",
 					"event": [
 						{
 							"listen": "test",
@@ -163,13 +163,9 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
-									"\r",
-									"pm.test(\"Response matches expected data\", function () {\r",
-									"    var jsonData = pm.response.json();\r",
-									"    var expectedData = {\r",
-									"    };\r",
-									"    pm.expect(jsonData).to.eql(expectedData);\r",
-									"});"
+									"setTimeout(function() {\r",
+									"    console.log('Sleep for 3 seconds complete');\r",
+									"}, 3000);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -179,12 +175,64 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.variables.set(\"waiting\", true);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/automation-testing/jobs/health-checks",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"automation-testing",
+								"jobs",
+								"health-checks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ensure Health Check Failed and Is Down",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
 									"\r",
-									"setTimeout(function() {\r",
-									"    pm.variables.set(\"waiting\", false);\r",
-									"    console.log(\"Waited for 30 seconds before proceeding with the request.\");\r",
-									"}, 31000);\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"All statuses are DOWN\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    jsonData[\"test-application-v1\"].forEach(function (app) {\r",
+									"        pm.expect(app.status).to.eql(\"DOWN\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
 									""
 								],
 								"type": "text/javascript",
@@ -237,7 +285,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v2\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -281,7 +329,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.11\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v2\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.11\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -315,32 +363,21 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
-									"pm.test(\"Response matches expected data\", function () {\r",
+									"pm.test(\"Ensure the length is 2\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
-									"    var expectedData = {\r",
-									"        \"test-application-v1\": [\r",
-									"            {\r",
-									"                \"applicationName\": \"test-application-v1\",\r",
-									"                \"applicationVersion\": 1,\r",
-									"                \"url\": \"http://10.10.10.10\",\r",
-									"                \"port\": 8080,\r",
-									"                \"status\": \"STARTING\",\r",
-									"                \"dependsOn\": [],\r",
-									"                \"metaData\": {}\r",
-									"            },\r",
-									"            {\r",
-									"                \"applicationName\": \"test-application-v1\",\r",
-									"                \"applicationVersion\": 1,\r",
-									"                \"url\": \"http://10.10.10.11\",\r",
-									"                \"port\": 8080,\r",
-									"                \"status\": \"STARTING\",\r",
-									"                \"dependsOn\": [],\r",
-									"                \"metaData\": {}\r",
-									"            }\r",
-									"        ]\r",
-									"    };\r",
-									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"    var length = jsonData[\"test-application-v2\"].length;\r",
+									"\r",
+									"    pm.expect(length == 2).to.be.true;\r",
 									"});\r",
+									"\r",
+									"pm.test(\"All statuses are STARTING\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    jsonData[\"test-application-v2\"].forEach(function (app) {\r",
+									"        pm.expect(app.status).to.eql(\"STARTING\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
 									""
 								],
 								"type": "text/javascript",
@@ -364,7 +401,55 @@
 					"response": []
 				},
 				{
-					"name": "Wait and Ensure Health Check Fails and Removes",
+					"name": "Run Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response time is less than 500ms\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{server}}/automation-testing/jobs/health-checks",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"automation-testing",
+								"jobs",
+								"health-checks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ensure Health Check Failed and Removes",
 					"event": [
 						{
 							"listen": "test",
@@ -379,13 +464,23 @@
 									"});\r",
 									"\r",
 									"\r",
-									"pm.test(\"Response matches expected data\", function () {\r",
+									"pm.test(\"Ensure the length is 2\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
-									"    var expectedData = {\r",
+									"    var length = jsonData[\"test-application-v2\"].length;\r",
 									"\r",
-									"    };\r",
-									"    pm.expect(jsonData).to.eql(expectedData);\r",
-									"});"
+									"    pm.expect(length == 2).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"All statuses are DOWN\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"\r",
+									"    jsonData[\"test-application-v2\"].forEach(function (app) {\r",
+									"        pm.expect(app.status).to.eql(\"DOWN\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -395,13 +490,9 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.variables.set(\"waiting\", true);\r",
-									"\r",
 									"setTimeout(function() {\r",
-									"    pm.variables.set(\"waiting\", false);\r",
-									"    console.log(\"Waited for 30 seconds before proceeding with the request.\");\r",
-									"}, 31000);\r",
-									""
+									"    console.log('Sleep for 5 seconds complete');\r",
+									"}, 5000);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -453,7 +544,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v3\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -496,7 +587,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"version\": 1,\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v3\",\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"version\": 1,\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -530,12 +621,12 @@
 									"    pm.response.to.have.status(200);\r",
 									"});\r",
 									"\r",
-									"\r",
-									"pm.test(\"Response matches expected data\", function () {\r",
+									"pm.test(\"test-application-v3 is not a key\", function () {\r",
 									"    var jsonData = pm.response.json();\r",
-									"    var expectedData = {\r",
-									"    };\r",
-									"    pm.expect(jsonData).to.eql(expectedData);\r",
+									"\r",
+									"    var keys = Object.keys(jsonData);\r",
+									"\r",
+									"    pm.expect(keys).to.not.include(\"test-application-v3\");\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -608,7 +699,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v4\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -652,7 +743,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v4\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -706,7 +797,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"applicationName\": \"test-application-v1\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
+							"raw": "{\r\n    \"applicationName\": \"test-application-v4\",\r\n    \"applicationVersion\": 1,\r\n    \"url\": \"http://10.10.10.10\",\r\n    \"port\": 8080\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

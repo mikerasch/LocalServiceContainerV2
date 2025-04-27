@@ -43,6 +43,7 @@ services:
       - ETCD_URLS=http://etcd:2379
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - spring.profiles.active=automation
     build:
       context: .
       dockerfile: Dockerfile

@@ -4,8 +4,8 @@ import static com.michael.container.registry.enums.Status.STATUSES_TO_SKIP_HEART
 
 import com.google.common.collect.Lists;
 import com.michael.container.annotations.SkipIfFollower;
+import com.michael.container.annotations.SkipIfAutomationEnvironment;
 import com.michael.container.distributed.election.enums.Role;
-import com.michael.container.distributed.election.state.ElectionState;
 import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.BaseInstance;
@@ -27,15 +27,12 @@ public class HealthCheckRoutine {
   private static final Logger log = LoggerFactory.getLogger(HealthCheckRoutine.class);
   private final HealthQueueRepository healthQueueRepository;
   private final ApplicationRepository applicationRepository;
-  private final ElectionState electionState;
 
   public HealthCheckRoutine(
       HealthQueueRepository healthQueueRepository,
-      ApplicationRepository applicationRepository,
-      ElectionState electionState) {
+      ApplicationRepository applicationRepository) {
     this.healthQueueRepository = healthQueueRepository;
     this.applicationRepository = applicationRepository;
-    this.electionState = electionState;
   }
 
   /**
@@ -55,6 +52,7 @@ public class HealthCheckRoutine {
    */
   @Scheduled(fixedRate = 10000L)
   @SkipIfFollower
+  @SkipIfAutomationEnvironment
   public void populateHealthCheckQueue() {
     List<ApplicationEntity> applicationEntities =
         Lists.newArrayList(applicationRepository.findAll());

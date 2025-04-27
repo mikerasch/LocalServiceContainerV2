@@ -1,6 +1,7 @@
 package com.michael.container.notifications.service;
 
 import com.michael.container.annotations.SkipIfFollower;
+import com.michael.container.annotations.SkipIfAutomationEnvironment;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotifyEvent;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
@@ -61,6 +62,7 @@ public class RegisterNotificationService extends NotificationService {
 
   @Scheduled(fixedRate = 4000L)
   @SkipIfFollower
+  @SkipIfAutomationEnvironment
   public void processPendingNotifications() {
     pendingServiceNotificationQueueRepository.dequeue().parallelStream()
         .forEach(
