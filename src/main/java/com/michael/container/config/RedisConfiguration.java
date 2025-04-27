@@ -5,6 +5,7 @@ import static com.michael.container.utils.ContainerConstants.HEALTH_QUEUE_PATTER
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
 import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,16 +20,14 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
-
 @Configuration
 public class RedisConfiguration {
   @Bean
   public RedisConnectionFactory redisConnectionFactory(
       @Value("${spring.redis.host}") String host, @Value("${spring.redis.port}") int port) {
     RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, port);
-    LettuceClientConfiguration clientConfiguration = LettuceClientConfiguration
-            .builder()
+    LettuceClientConfiguration clientConfiguration =
+        LettuceClientConfiguration.builder()
             .commandTimeout(Duration.ofSeconds(10L))
             .shutdownTimeout(Duration.ZERO)
             .build();

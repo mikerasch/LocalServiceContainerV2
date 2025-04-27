@@ -1,7 +1,7 @@
 package com.michael.container.notifications.service;
 
-import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.annotations.SkipIfAutomationEnvironment;
+import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.notifications.client.NotificationClient;
 import com.michael.container.notifications.enums.NotifyEvent;
 import com.michael.container.notifications.model.ServiceNotificationRequest;

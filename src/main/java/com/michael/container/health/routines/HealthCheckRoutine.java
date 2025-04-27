@@ -3,8 +3,8 @@ package com.michael.container.health.routines;
 import static com.michael.container.registry.enums.Status.STATUSES_TO_SKIP_HEARTBEAT;
 
 import com.google.common.collect.Lists;
-import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.annotations.SkipIfAutomationEnvironment;
+import com.michael.container.annotations.SkipIfFollower;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
@@ -29,8 +29,7 @@ public class HealthCheckRoutine {
   private final ApplicationRepository applicationRepository;
 
   public HealthCheckRoutine(
-      HealthQueueRepository healthQueueRepository,
-      ApplicationRepository applicationRepository) {
+      HealthQueueRepository healthQueueRepository, ApplicationRepository applicationRepository) {
     this.healthQueueRepository = healthQueueRepository;
     this.applicationRepository = applicationRepository;
   }
