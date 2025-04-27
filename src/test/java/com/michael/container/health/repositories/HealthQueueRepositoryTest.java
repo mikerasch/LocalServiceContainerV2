@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 @Import(HealthQueueRepository.class)
 class HealthQueueRepositoryTest extends RedisTestConfiguration {
   @MockitoBean StringRedisTemplate stringRedisTemplate;

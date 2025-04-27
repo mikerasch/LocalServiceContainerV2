@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 class CrudRegistryTest extends RedisTestConfiguration {
   CrudRegistry crudRegistry;
   @Mock ApplicationEventPublisher eventPublisher;

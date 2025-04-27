@@ -5,6 +5,7 @@ import com.michael.container.registry.cache.listener.key.KeyOrchestrator;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.GenericContainer;
@@ -12,6 +13,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 
 @DataRedisTest
 @Import({RedisConfiguration.class, KeyOrchestrator.class})
+@ExtendWith(DockerExtension.class)
 public class RedisTestConfiguration {
   private static final GenericContainer<?> redisContainer =
       new GenericContainer<>("redis:6.2-alpine")

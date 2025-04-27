@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.redis.core.RedisTemplate;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 @Import(PendingServiceNotificationQueueRepository.class)
 // TODO CLEAN UP TO FIXTURES
 class RegisterNotificationServiceTest extends RedisTestConfiguration {
@@ -283,7 +283,6 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   void
       notify_ServiceDependsOnMultipleServices_OneServiceNotRegisteredYet_ScheduledJobRuns_FindsService() {
     ServiceNotificationRequest serviceNotificationRequest =
