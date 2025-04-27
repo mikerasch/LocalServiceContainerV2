@@ -2,6 +2,7 @@ package com.michael.container.notifications.service;
 
 import static com.michael.container.utils.ContainerConstants.PENDING_SERVICE_QUEUE_PATTERN_NAME;
 
+import com.michael.container.DockerExtension;
 import com.michael.container.RedisTestConfiguration;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
@@ -37,7 +38,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.redis.core.RedisTemplate;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, DockerExtension.class})
 @Import(PendingServiceNotificationQueueRepository.class)
 // TODO CLEAN UP TO FIXTURES
 class RegisterNotificationServiceTest extends RedisTestConfiguration {
@@ -283,7 +284,6 @@ class RegisterNotificationServiceTest extends RedisTestConfiguration {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   void
       notify_ServiceDependsOnMultipleServices_OneServiceNotRegisteredYet_ScheduledJobRuns_FindsService() {
     ServiceNotificationRequest serviceNotificationRequest =

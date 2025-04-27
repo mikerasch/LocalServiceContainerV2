@@ -1,5 +1,6 @@
 package com.michael.container.registry.cache.crud;
 
+import com.michael.container.DockerExtension;
 import com.michael.container.RedisTestConfiguration;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
@@ -26,7 +27,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, DockerExtension.class})
 class CrudRegistryTest extends RedisTestConfiguration {
   CrudRegistry crudRegistry;
   @Mock ApplicationEventPublisher eventPublisher;
