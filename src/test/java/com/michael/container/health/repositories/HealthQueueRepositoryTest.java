@@ -1,6 +1,5 @@
 package com.michael.container.health.repositories;
 
-import com.michael.container.DockerExtension;
 import com.michael.container.RedisTestConfiguration;
 import com.michael.container.distributed.election.enums.Role;
 import com.michael.container.distributed.election.state.ElectionState;
@@ -19,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@ExtendWith({MockitoExtension.class, DockerExtension.class})
+@ExtendWith({MockitoExtension.class})
 @Import(HealthQueueRepository.class)
 class HealthQueueRepositoryTest extends RedisTestConfiguration {
   @MockitoBean StringRedisTemplate stringRedisTemplate;
