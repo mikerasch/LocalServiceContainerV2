@@ -9,12 +9,10 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class SkipIfAutomationTestAspect {
+public class SkipIfAutomationEnvironmentAspect {
   private final Environment environment;
-  private final String AUTOMATION_CONTROLLER_NAME =
-      "com.michael.container.automation.controller.AutomationEnvironmentController";
 
-  public SkipIfAutomationTestAspect(final Environment environment) {
+  public SkipIfAutomationEnvironmentAspect(final Environment environment) {
     this.environment = environment;
   }
 
