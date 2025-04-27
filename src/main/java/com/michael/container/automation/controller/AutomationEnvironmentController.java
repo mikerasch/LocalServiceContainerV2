@@ -25,7 +25,8 @@ public class AutomationEnvironmentController {
 
   public AutomationEnvironmentController(
       RegisterNotificationService registerNotificationService,
-      HealthCheckRoutine healthCheckRoutine) throws Exception {
+      HealthCheckRoutine healthCheckRoutine)
+      throws Exception {
     // We want to bypass the spring proxy to avoid the AOP restrictions placed on these classes.
     this.registerNotificationService =
         (RegisterNotificationService) translateToRealObject(registerNotificationService);
@@ -48,7 +49,7 @@ public class AutomationEnvironmentController {
 
   private Object translateToRealObject(Object object) throws Exception {
     if (AopUtils.isAopProxy(object) && object instanceof Advised advised) {
-        return advised.getTargetSource().getTarget();
+      return advised.getTargetSource().getTarget();
     }
     return object;
   }
