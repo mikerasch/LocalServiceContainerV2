@@ -44,6 +44,5 @@ class ServiceRegistryAutoConfigurationTest {
   }
 
   @Test
-  void contextLoads() {
-  }
+  void contextLoads() {}
 }
