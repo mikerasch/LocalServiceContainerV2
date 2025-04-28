@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OutageNotificationService extends NotificationService {
 
-  protected OutageNotificationService(
+  public OutageNotificationService(
       NotificationClient notificationClient, CrudRegistry crudRegistry) {
     super(notificationClient, crudRegistry);
   }

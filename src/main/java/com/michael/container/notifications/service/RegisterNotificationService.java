@@ -24,7 +24,7 @@ public class RegisterNotificationService extends NotificationService {
   private final ConversionService conversionService;
   private static final Logger logger = LoggerFactory.getLogger(RegisterNotificationService.class);
 
-  protected RegisterNotificationService(
+  public RegisterNotificationService(
       NotificationClient notificationClient,
       CrudRegistry crudRegistry,
       PendingServiceNotificationQueueRepository pendingServiceNotificationQueueRepository,

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GeneralNotificationService extends NotificationService {
-  protected GeneralNotificationService(
+  public GeneralNotificationService(
       NotificationClient notificationClient, CrudRegistry crudRegistry) {
     super(notificationClient, crudRegistry);
   }
