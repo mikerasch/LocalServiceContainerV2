@@ -18,6 +18,7 @@
     <modules>
         <module>server-bom</module>
         <module>server</module>
+        <module>registry-server-runner</module>
     </modules>
 
     <build>
