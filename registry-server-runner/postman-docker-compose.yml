@@ -46,7 +46,7 @@ services:
       - spring.profiles.active=automation
     build:
       context: ..
-      dockerfile: ../Dockerfile
+      dockerfile: ./registry-server-runner/Dockerfile
     ports:
       - "9095:9095"
     networks:

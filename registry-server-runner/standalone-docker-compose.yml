@@ -49,7 +49,7 @@ services:
       - REDIS_PORT=6379
     build:
       context: ..
-      dockerfile: ../Dockerfile
+      dockerfile: ./registry-server-runner/Dockerfile
     depends_on:
       redis:
         condition: service_healthy
