@@ -7,6 +7,6 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 
 @ComponentScan("com.michael.container")
 @Configuration
-@ConditionalOnProperty(value = "service.registry.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = "service.registry.enabled", havingValue = "true")
 @EnableRedisRepositories(basePackages = "com.michael.container")
 public class ScanPackages {}
