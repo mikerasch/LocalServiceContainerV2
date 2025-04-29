@@ -38,5 +38,5 @@ jobs:
       - name: Clean up containers
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: "./registry-server-runner/postman-docker-compose.yml"
+          compose-file: "registry-server-runner/postman-docker-compose.yml"
           action: "down"
