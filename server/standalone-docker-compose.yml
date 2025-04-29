@@ -1,0 +1,70 @@
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.16
+    entrypoint: /usr/local/bin/etcd
+    ports:
+      - "2379:2379"
+    networks:
+      - app-network
+    command:
+      - '--name=etcd'
+      - '--initial-advertise-peer-urls=http://etcd:2380'
+      - '--listen-peer-urls=http://0.0.0.0:2380'
+      - '--listen-client-urls=http://0.0.0.0:2379'
+      - '--advertise-client-urls=http://etcd:2379'
+      - '--heartbeat-interval=250'
+      - '--election-timeout=1250'
+      - '--initial-cluster=etcd=http://etcd:2380'
+      - '--initial-cluster-state=new'
+    healthcheck:
+      test: [ "CMD", "etcdctl", "endpoint", "health" ]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        redis-server --notify-keyspace-events 'Ex' "
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+  service-registry:
+    deploy:
+      mode: replicated
+      replicas: 2
+      endpoint_mode: vip
+    environment:
+      - ETCD_URLS=http://etcd:2379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    build:
+      context: ..
+      dockerfile: ../Dockerfile
+    depends_on:
+      redis:
+        condition: service_healthy
+      etcd:
+        condition: service_healthy
+    ports:
+      - "9095"
+    networks:
+      - app-network
+    healthcheck:
+      test: "curl --fail --silent http://service-registry:9095/service-registry/api/v2/actuator/health | grep UP || exit 1"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+networks:
+  app-network:
+    driver: bridge
