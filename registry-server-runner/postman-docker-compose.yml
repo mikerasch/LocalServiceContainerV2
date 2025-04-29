@@ -66,8 +66,8 @@ services:
   newman:
     image: postman/newman:alpine
     volumes:
-      - ./registry-server-runner/postman/environment/env.json:/etc/newman/environment.json
-      - ./registry-server-runner/postman/collection/collection.json:/etc/newman/collection.json
+      - ../registry-server-runner/postman/environment/env.json:/etc/newman/environment.json
+      - ../registry-server-runner/postman/collection/collection.json:/etc/newman/collection.json
     networks:
       - app-network
     depends_on:
