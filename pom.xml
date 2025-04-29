@@ -5,15 +5,8 @@
 
     <groupId>com.michael</groupId>
     <artifactId>service-container-parent</artifactId>
-    <version>1.0.0</version>
+    <version>${project.version</version>
     <packaging>pom</packaging>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.2</version>
-        <relativePath/>
-    </parent>
 
     <modules>
         <module>server-bom</module>
@@ -21,12 +14,17 @@
         <module>registry-server-runner</module>
     </modules>
 
+    <properties>
+        <project.version>1.0.0</project.version>
+        <spotless-maven-plugin.veresion>2.43.0</spotless-maven-plugin.veresion>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
-                <version>2.43.0</version>
+                <version>${spotless-maven-plugin.veresion}</version>
                 <configuration>
                     <java>
                         <googleJavaFormat>
