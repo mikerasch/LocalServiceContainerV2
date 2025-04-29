@@ -17,6 +17,9 @@
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-compiler-plugin.verison>3.10.1</maven-compiler-plugin.verison>
+        <testcontainers-redis.version>1.6.4</testcontainers-redis.version>
+        <jetcd-launcher.version>0.8.4</jetcd-launcher.version>
     </properties>
 
     <dependencyManagement>
@@ -24,7 +27,7 @@
             <dependency>
                 <groupId>com.michael</groupId>
                 <artifactId>service-container-server-bom</artifactId>
-                <version>1.0.0</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -79,29 +82,27 @@
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-launcher</artifactId>
-            <version>0.8.4</version>
+            <version>${jetcd-launcher.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.4.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.redis.testcontainers</groupId>
             <artifactId>testcontainers-redis</artifactId>
-            <version>1.6.4</version>
+            <version>${testcontainers-redis.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>${maven-compiler-plugin.verison}</version>
             </plugin>
         </plugins>
     </build>

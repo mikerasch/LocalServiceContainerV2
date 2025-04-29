@@ -22,7 +22,7 @@
             <dependency>
                 <groupId>com.michael</groupId>
                 <artifactId>service-container-parent</artifactId>
-                <version>1.0.0</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.michael</groupId>
             <artifactId>service-container-server</artifactId>
-            <version>1.0.0</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
