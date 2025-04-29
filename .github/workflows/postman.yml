@@ -28,15 +28,15 @@ jobs:
       - name: Run Docker Compose
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: "./postman-docker-compose.yml"
+          compose-file: "./registry-server-runner/postman-docker-compose.yml"
           action: "up"
 
       - name: Run Application With Postman Tests
         run: |
-          docker compose -f postman-docker-compose.yml up --build --exit-code-from newman
+          docker compose -f ./registry-server-runner/postman-docker-compose.yml up --build --exit-code-from newman
 
       - name: Clean up containers
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
-          compose-file: "./postman-docker-compose.yml"
+          compose-file: "./registry-server-runner/postman-docker-compose.yml"
           action: "down"
