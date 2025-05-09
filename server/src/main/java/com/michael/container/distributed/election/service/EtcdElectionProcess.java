@@ -6,6 +6,7 @@ import com.michael.container.distributed.election.model.LeaderKeyDeletionEvent;
 import com.michael.container.distributed.election.model.LockResult;
 import com.michael.container.distributed.election.observer.LeaseRenewalStreamObserver;
 import com.michael.container.distributed.election.state.ElectionState;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.options.WatchOption;
@@ -47,6 +48,7 @@ public class EtcdElectionProcess implements ElectionProcess {
    * will also trigger various cleanup actions of the election state.
    */
   @Override
+  @ExecutionTime
   public void releaseLeadership() {
     try {
       if (electionState.getRole() == Role.LEADER) {
@@ -67,6 +69,7 @@ public class EtcdElectionProcess implements ElectionProcess {
    * 5) Listen for the leader key's deletion, and if deleted, start a new election process.
    */
   @Override
+  @ExecutionTime
   public void startLeaderElection() {
     boolean acquiredLeadership = false;
     try {
