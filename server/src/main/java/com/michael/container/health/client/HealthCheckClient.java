@@ -1,6 +1,7 @@
 package com.michael.container.health.client;
 
 import com.michael.container.health.exception.HealthCheckInvalidException;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -27,6 +28,7 @@ public class HealthCheckClient {
    *
    * @param url the URL of the health check endpoint
    */
+  @ExecutionTime
   public void checkHealth(@Nonnull String url) {
     try {
       restClient.get().uri(url).retrieve().toBodilessEntity();

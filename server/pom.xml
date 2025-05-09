@@ -96,6 +96,12 @@
             <version>${testcontainers-redis.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.michael</groupId>
+            <artifactId>spring-utils</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -11,6 +11,7 @@ import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.BaseInstance;
 import com.michael.container.registry.cache.entity.HealthQueueEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +53,7 @@ public class HealthCheckRoutine {
   @Scheduled(fixedRate = 10000L)
   @SkipIfFollower
   @SkipIfAutomationEnvironment
+  @ExecutionTime
   public void populateHealthCheckQueue() {
     List<ApplicationEntity> applicationEntities =
         Lists.newArrayList(applicationRepository.findAll());

@@ -3,6 +3,7 @@ package com.michael.container.heartbeat.controller;
 import com.michael.container.heartbeat.model.HeartbeatRequest;
 import com.michael.container.heartbeat.model.HeartbeatResponse;
 import com.michael.container.heartbeat.service.HeartbeatService;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ public class HeartbeatController {
           "Used for clients to perform heartbeats. This will re-register the TTL of the record."
               + " If TTL has expired, or no record found, "
               + "it will return RE_REGISTER, in which the client is expected to re-register.")
+  @ExecutionTime
   public HeartbeatResponse heartbeat(@RequestBody @Valid HeartbeatRequest heartbeatRequest) {
     return heartbeatService.heartbeat(heartbeatRequest);
   }

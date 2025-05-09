@@ -5,6 +5,7 @@ import com.michael.container.registry.model.RegisterServiceResponse;
 import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class ServiceRegistryController {
       summary =
           "Register a service. If the service already exists matching down "
               + "to the unique identifier (application-name + url + port + version), it will update the TTL.")
+  @ExecutionTime
   public void registerService(@RequestBody @Valid RegisterServiceRequest registerServiceRequest) {
     registryService.registerService(registerServiceRequest);
   }
@@ -41,6 +43,7 @@ public class ServiceRegistryController {
   @GetMapping
   @Operation(
       summary = "Fetches all services, including: expired and not-expired registered services.")
+  @ExecutionTime
   public Map<String, Set<RegisterServiceResponse>> retrieveAllServices() {
     return registryService.fetchAll();
   }
@@ -50,6 +53,7 @@ public class ServiceRegistryController {
   @Operation(
       summary =
           "Deregister a service. Upon deregister, all dependent services will receive a DE_REGISTER event.")
+  @ExecutionTime
   public void deregisterService(@RequestBody @Valid RemoveServiceRequest deregisterRequest) {
     registryService.removeService(deregisterRequest);
   }
@@ -59,6 +63,7 @@ public class ServiceRegistryController {
   @Operation(
       summary =
           "Updates the status of a service. All dependent services will become aware of this transition.")
+  @ExecutionTime
   public void updateStatusOnService(@RequestBody @Valid UpdateStatusRequest updateStatusRequest) {
     registryService.updateStatusOnService(updateStatusRequest, true);
   }
