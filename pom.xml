@@ -12,6 +12,7 @@
         <module>server-bom</module>
         <module>server</module>
         <module>registry-server-runner</module>
+        <module>spring-utils</module>
     </modules>
 
     <properties>
