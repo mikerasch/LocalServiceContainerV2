@@ -14,7 +14,6 @@ public class AppConfig {
 
   @Bean("healthCheckExecutorService")
   public ExecutorService healthCheckExecutorService() {
-    // TODO FIX
-    return Executors.newFixedThreadPool(10);
+    return Executors.newVirtualThreadPerTaskExecutor();
   }
 }
