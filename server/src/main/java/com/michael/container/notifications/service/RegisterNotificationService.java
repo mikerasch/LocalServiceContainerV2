@@ -9,6 +9,7 @@ import com.michael.container.notifications.repositories.PendingServiceNotificati
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import jakarta.annotation.Nonnull;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class RegisterNotificationService extends NotificationService {
   @Scheduled(fixedRate = 4000L)
   @SkipIfFollower
   @SkipIfAutomationEnvironment
+  @ExecutionTime
   public void processPendingNotifications() {
     pendingServiceNotificationQueueRepository.dequeue().parallelStream()
         .forEach(

@@ -2,6 +2,7 @@ package com.michael.container.notifications.client;
 
 import com.michael.container.notifications.exception.NotificationException;
 import com.michael.container.notifications.model.ServiceNotificationRequest;
+import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import org.springframework.http.MediaType;
@@ -33,6 +34,7 @@ public class NotificationClient {
    * @param url the URL to which the service notification should be sent
    * @param serviceNotificationRequest the {@link ServiceNotificationRequest} containing the details of the notification
    */
+  @ExecutionTime
   public void sendNotification(
       @Nonnull String url, @Nonnull ServiceNotificationRequest serviceNotificationRequest) {
     try {
