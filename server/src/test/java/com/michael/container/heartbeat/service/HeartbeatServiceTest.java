@@ -1,6 +1,7 @@
 package com.michael.container.heartbeat.service;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.contract.resources.validations.enums.HeartbeatEvent;
