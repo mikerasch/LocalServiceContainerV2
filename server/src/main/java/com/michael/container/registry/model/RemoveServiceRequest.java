@@ -1,6 +1,6 @@
 package com.michael.container.registry.model;
 
-import com.michael.container.validation.annotation.HttpUrl;
+import com.michael.contract.resources.validations.annotations.HttpUrl;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 

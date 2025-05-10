@@ -1,10 +1,10 @@
 package com.michael.container.heartbeat.service;
 
 import com.michael.container.heartbeat.enums.HeartbeatEvent;
-import com.michael.container.heartbeat.model.HeartbeatRequest;
 import com.michael.container.heartbeat.model.HeartbeatResponse;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.contract.resources.validations.requests.HeartbeatRequest;
 import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Service;
 
