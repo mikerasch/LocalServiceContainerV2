@@ -76,9 +76,7 @@ public class EtcdElectionProcess implements ElectionProcess {
       // Try and be efficient, we wrap all the computations into one request
       LockResult lockResult =
           lockProcess.lock(
-              etcdConfiguration.getEtcdLeaderKey(),
-              etcdConfiguration.getServiceUniqueIdentifier().toString(),
-              5L);
+              etcdConfiguration.getEtcdLeaderKey(), etcdConfiguration.getBaseUrl(), 5L);
       electionState.setLeaseId(lockResult.leaseId());
       if (lockResult.txnResponse().isSucceeded()) {
         acquiredLeadership = true;

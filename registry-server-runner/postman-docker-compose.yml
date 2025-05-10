@@ -44,6 +44,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - spring.profiles.active=automation
+      - APP_BASE_URL=https://postman-docker:8080
     build:
       context: ..
       dockerfile: ./registry-server-runner/Dockerfile
