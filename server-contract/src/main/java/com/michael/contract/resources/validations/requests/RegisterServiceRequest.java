@@ -1,12 +1,12 @@
-package com.michael.container.registry.model;
+package com.michael.contract.resources.validations.requests;
 
-import com.michael.container.registry.enums.Tag;
-import com.michael.container.validation.annotation.HttpUrl;
+import com.michael.contract.resources.validations.annotations.HttpUrl;
+import com.michael.contract.resources.validations.enums.Tag;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.lang.Nullable;
 
 public record RegisterServiceRequest(
     @NotNull

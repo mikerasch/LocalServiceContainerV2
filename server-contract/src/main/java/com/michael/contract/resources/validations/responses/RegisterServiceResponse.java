@@ -1,7 +1,7 @@
-package com.michael.container.registry.model;
+package com.michael.contract.resources.validations.responses;
 
-import com.michael.container.registry.enums.Status;
-import com.michael.container.registry.enums.Tag;
+import com.michael.contract.resources.validations.enums.Status;
+import com.michael.contract.resources.validations.enums.Tag;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.lang.NonNull;

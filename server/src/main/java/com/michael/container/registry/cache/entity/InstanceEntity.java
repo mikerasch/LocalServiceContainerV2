@@ -1,8 +1,8 @@
 package com.michael.container.registry.cache.entity;
 
-import com.michael.container.registry.enums.Status;
-import com.michael.container.registry.enums.Tag;
 import com.michael.container.utils.ContainerConstants;
+import com.michael.contract.resources.validations.enums.Status;
+import com.michael.contract.resources.validations.enums.Tag;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

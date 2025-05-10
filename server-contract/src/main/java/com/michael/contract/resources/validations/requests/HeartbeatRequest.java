@@ -1,6 +1,6 @@
-package com.michael.container.heartbeat.model;
+package com.michael.contract.resources.validations.requests;
 
-import com.michael.container.validation.annotation.HttpUrl;
+import com.michael.contract.resources.validations.annotations.HttpUrl;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 

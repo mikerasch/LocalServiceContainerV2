@@ -2,8 +2,8 @@ package com.michael.container.notifications.fsm.status;
 
 import com.michael.container.notifications.enums.StatusStateEvent;
 import com.michael.container.registry.cache.entity.InstanceEntity;
-import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.StatusChangeEvent;
+import com.michael.contract.resources.validations.enums.Status;
 import jakarta.annotation.Nonnull;
 import java.util.Map;
 import java.util.Set;

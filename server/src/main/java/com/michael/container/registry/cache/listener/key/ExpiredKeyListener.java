@@ -2,8 +2,8 @@ package com.michael.container.registry.cache.listener.key;
 
 import com.michael.container.distributed.election.enums.MethodAccess;
 import com.michael.container.registry.enums.Key;
-import com.michael.container.registry.model.RemoveServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.contract.resources.validations.requests.RemoveServiceRequest;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

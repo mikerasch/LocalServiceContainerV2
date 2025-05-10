@@ -1,4 +1,4 @@
-package com.michael.container.heartbeat.enums;
+package com.michael.contract.resources.validations.enums;
 
 public enum HeartbeatEvent {
   FOUND("Heartbeat Found"),

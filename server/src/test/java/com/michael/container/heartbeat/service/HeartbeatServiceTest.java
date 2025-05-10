@@ -2,12 +2,12 @@ package com.michael.container.heartbeat.service;
 
 import static org.mockito.ArgumentMatchers.*;
 
-import com.michael.container.heartbeat.enums.HeartbeatEvent;
-import com.michael.container.heartbeat.model.HeartbeatRequest;
-import com.michael.container.heartbeat.model.HeartbeatResponse;
 import com.michael.container.registry.cache.crud.CrudRegistry;
-import com.michael.container.registry.enums.Status;
-import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.contract.resources.validations.enums.HeartbeatEvent;
+import com.michael.contract.resources.validations.enums.Status;
+import com.michael.contract.resources.validations.requests.HeartbeatRequest;
+import com.michael.contract.resources.validations.responses.HeartbeatResponse;
+import com.michael.contract.resources.validations.responses.RegisterServiceResponse;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;

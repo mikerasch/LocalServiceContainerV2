@@ -1,6 +1,6 @@
-package com.michael.container.validation.handler;
+package com.michael.contract.resources.validations.handlers;
 
-import com.michael.container.validation.annotation.HttpUrl;
+import com.michael.contract.resources.validations.annotations.HttpUrl;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.net.URI;

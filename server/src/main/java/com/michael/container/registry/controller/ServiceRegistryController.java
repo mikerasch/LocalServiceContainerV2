@@ -1,10 +1,10 @@
 package com.michael.container.registry.controller;
 
-import com.michael.container.registry.model.RegisterServiceRequest;
-import com.michael.container.registry.model.RegisterServiceResponse;
-import com.michael.container.registry.model.RemoveServiceRequest;
-import com.michael.container.registry.model.UpdateStatusRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.contract.resources.validations.requests.RegisterServiceRequest;
+import com.michael.contract.resources.validations.requests.RemoveServiceRequest;
+import com.michael.contract.resources.validations.requests.UpdateStatusRequest;
+import com.michael.contract.resources.validations.responses.RegisterServiceResponse;
 import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;

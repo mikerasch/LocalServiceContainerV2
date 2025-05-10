@@ -7,7 +7,7 @@ import com.michael.container.health.repositories.HealthQueueRepository;
 import com.michael.container.registry.cache.entity.ApplicationEntity;
 import com.michael.container.registry.cache.entity.InstanceEntity;
 import com.michael.container.registry.cache.repositories.ApplicationRepository;
-import com.michael.container.registry.enums.Status;
+import com.michael.contract.resources.validations.enums.Status;
 import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.Test;

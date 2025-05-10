@@ -1,4 +1,4 @@
-package com.michael.container.registry.enums;
+package com.michael.contract.resources.validations.enums;
 
 public enum Tag {
   LANGUAGE,
