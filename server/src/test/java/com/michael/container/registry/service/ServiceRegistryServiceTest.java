@@ -1,11 +1,11 @@
 package com.michael.container.registry.service;
 
 import com.michael.container.registry.cache.crud.CrudRegistry;
-import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.mapper.RegisterServiceRequestToRegisterServiceResponseMapper;
-import com.michael.container.registry.model.RegisterServiceRequest;
-import com.michael.container.registry.model.RegisterServiceResponse;
-import com.michael.container.registry.model.RemoveServiceRequest;
+import com.michael.contract.resources.validations.enums.Status;
+import com.michael.contract.resources.validations.requests.RegisterServiceRequest;
+import com.michael.contract.resources.validations.requests.RemoveServiceRequest;
+import com.michael.contract.resources.validations.responses.RegisterServiceResponse;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;

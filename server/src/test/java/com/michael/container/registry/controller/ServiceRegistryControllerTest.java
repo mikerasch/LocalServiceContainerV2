@@ -5,8 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.michael.container.registry.model.RegisterServiceRequest;
 import com.michael.container.registry.service.ServiceRegistryService;
+import com.michael.contract.resources.validations.requests.RegisterServiceRequest;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeEach;

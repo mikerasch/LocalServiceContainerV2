@@ -1,6 +1,6 @@
 package com.michael.container.notifications.enums;
 
-import com.michael.container.registry.enums.Status;
+import com.michael.contract.resources.validations.enums.Status;
 import jakarta.annotation.Nonnull;
 import java.util.Optional;
 

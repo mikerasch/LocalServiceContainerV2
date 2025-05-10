@@ -8,7 +8,7 @@ import com.michael.container.notifications.model.ServiceNotificationRequest;
 import com.michael.container.notifications.repositories.PendingServiceNotificationQueueRepository;
 import com.michael.container.registry.cache.crud.CrudRegistry;
 import com.michael.container.registry.cache.entity.PendingServiceNotificationEntity;
-import com.michael.container.registry.model.RegisterServiceResponse;
+import com.michael.contract.resources.validations.responses.RegisterServiceResponse;
 import com.michael.spring.utils.logger.annotations.ExecutionTime;
 import jakarta.annotation.Nonnull;
 import java.util.Set;

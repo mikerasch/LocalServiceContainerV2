@@ -1,7 +1,7 @@
 package com.michael.container.notifications.fsm.status;
 
-import com.michael.container.registry.enums.Status;
 import com.michael.container.registry.model.StatusChangeEvent;
+import com.michael.contract.resources.validations.enums.Status;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;

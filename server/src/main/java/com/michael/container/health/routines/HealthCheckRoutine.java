@@ -1,6 +1,6 @@
 package com.michael.container.health.routines;
 
-import static com.michael.container.registry.enums.Status.STATUSES_TO_SKIP_HEARTBEAT;
+import static com.michael.contract.resources.validations.enums.Status.STATUSES_TO_SKIP_HEARTBEAT;
 
 import com.google.common.collect.Lists;
 import com.michael.container.annotations.SkipIfAutomationEnvironment;
