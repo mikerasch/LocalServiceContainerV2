@@ -47,6 +47,7 @@ services:
       - ETCD_URLS=http://etcd:2379
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - APP_BASE_URL=https://standalone-docker:8080
     build:
       context: ..
       dockerfile: ./registry-server-runner/Dockerfile

@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"etcd.leader.key=/leader"})
+@TestPropertySource(properties = {"etcd.leader.key=/leader", "app.base.url=https://localhost:8080"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(DockerExtension.class)
 public class IntegrationTestExtension {

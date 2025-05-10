@@ -4,20 +4,21 @@ import com.michael.container.exceptions.UncheckedURISyntaxException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EtcdConfiguration {
   private final String etcdLeaderKey;
-  private final UUID serviceUniqueIdentifier;
+  private final String baseUrl;
   private final URI[] etcdEndpoints;
 
   public EtcdConfiguration(
-      @Value("${etcd.leader.key}") String etcLeaderKey, @Value("${etcd.urls}") String etcdUrls) {
+      @Value("${etcd.leader.key}") String etcLeaderKey,
+      @Value("${app.base.url}") String baseUrl,
+      @Value("${etcd.urls}") String etcdUrls) {
     this.etcdLeaderKey = etcLeaderKey;
-    serviceUniqueIdentifier = UUID.randomUUID();
+    this.baseUrl = baseUrl;
     etcdEndpoints =
         Arrays.stream(etcdUrls.split(","))
             .map(
@@ -36,11 +37,11 @@ public class EtcdConfiguration {
     return etcdLeaderKey;
   }
 
-  public UUID getServiceUniqueIdentifier() {
-    return serviceUniqueIdentifier;
-  }
-
   public URI[] getEtcdEndpoints() {
     return etcdEndpoints;
+  }
+
+  public String getBaseUrl() {
+    return baseUrl;
   }
 }
